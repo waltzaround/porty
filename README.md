@@ -24,6 +24,14 @@ Head to **[porty.walt.online](https://porty.walt.online)** for available downloa
 
 Using a setup that Porty doesn't recognise? [Open an issue](https://github.com/waltzaround/porty/issues) with your computer model, operating system, and what you expected to see. Please remove serial numbers and other personal details from anything you share.
 
+## Hardware guides
+
+- [How to check USB connection speed on Mac](https://porty.walt.online/guides/check-usb-speed-mac/)
+- [How to view a USB device tree on Windows](https://porty.walt.online/guides/usb-device-tree-windows/)
+- [Why a USB 3 hub can show 480 Mb/s](https://porty.walt.online/guides/usb-3-hub-480-mbps/)
+
+Each guide includes practical checks, reported hardware examples, and links to Apple, Microsoft, or USB-IF documentation.
+
 ## Thank you, WhatCable
 
 Porty was inspired in part by **[WhatCable](https://github.com/darrylmorley/whatcable)** by **Darryl Morley**, and adapts some of its MIT-licensed code for macOS USB-C cable identification and power decoding. Thank you for making that work available and helping make confusing connections easier to understand.

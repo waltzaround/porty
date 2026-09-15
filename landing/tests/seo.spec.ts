@@ -3,6 +3,8 @@ import { readFile, readdir } from "node:fs/promises";
 import { resolve } from "node:path";
 import { product, questions } from "../src/lib/product";
 import { crawlFiles, renderMetadata, siteSettings, structuredData } from "../src/lib/seo";
+import { guidePath, guides } from "../src/lib/guides";
+import AxeBuilder from "@axe-core/playwright";
 
 test("production HTML contains the product, FAQ, and metadata before JavaScript", async ({ request }) => {
   const response = await request.get("/");
@@ -32,7 +34,7 @@ test("FAQs and platform downloads are usable without JavaScript", async ({ brows
   const page = await context.newPage();
   try {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("connections.");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Explore USB ports");
     const answer = page.getByRole("region", { name: questions[1][0] });
     await expect(answer).not.toBeVisible();
     await page.locator("summary", { hasText: questions[1][0] }).click();
@@ -45,6 +47,68 @@ test("FAQs and platform downloads are usable without JavaScript", async ({ brows
   } finally {
     await context.close();
   }
+});
+
+test("every guide is a distinct static page with matching canonical and article data", async ({ request }) => {
+  const home = await (await request.get("/")).text();
+  const origin = home.match(/rel="canonical" href="([^"]+)"/)?.[1];
+  for (const guide of guides) {
+    const response = await request.get(guidePath(guide));
+    expect(response.status()).toBe(200);
+    const html = await response.text();
+    expect(html).toContain(`<h1>${guide.title}</h1>`);
+    expect(html).toContain(guide.summary);
+    expect(html).toContain(guide.sources[0].url);
+    if (origin) expect(html).toContain(`rel="canonical" href="${new URL(guidePath(guide), origin).href}"`);
+    const data = JSON.parse(html.match(/<script type="application\/ld\+json">(.+?)<\/script>/)![1]);
+    expect(data["@graph"]).toContainEqual(expect.objectContaining({ "@type": "Article", headline: guide.title }));
+  }
+  if (home.includes('content="index, follow,')) {
+    const sitemap = await (await request.get("/sitemap.xml")).text();
+    expect(sitemap.match(/<loc>/g)).toHaveLength(5);
+    for (const guide of guides) expect(sitemap).toContain(guidePath(guide));
+  }
+});
+
+test("guides work without JavaScript, including contents links and navigation", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false, baseURL: "http://127.0.0.1:4180" });
+  const page = await context.newPage();
+  try {
+    await page.goto("/");
+    await page.getByRole("link", { name: "All hardware guides" }).click();
+    await expect(page).toHaveURL(/\/guides\/$/);
+    await page.getByRole("link", { name: new RegExp(guides[0].title) }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(guides[0].title);
+    await page.getByRole("navigation", { name: "On this page" }).getByRole("link").last().click();
+    await expect(page).toHaveURL(/#compare$/);
+    await expect(page.getByRole("heading", { name: "Compare one part of the setup at a time" })).toBeVisible();
+  } finally { await context.close(); }
+});
+
+test("guide hydration, mobile layout and accessibility remain intact", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const guide of guides) {
+    await page.goto(guidePath(guide));
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(guide.title);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa"]).analyze();
+    expect(result.violations.map((issue) => ({ id: issue.id, nodes: issue.nodes.map((node) => node.target) }))).toEqual([]);
+  }
+  expect(errors).toEqual([]);
+});
+
+test("the hero uses a responsive modern image without fetching the original PNG", async ({ page }) => {
+  const images: string[] = [];
+  page.on("request", (request) => { if (request.resourceType() === "image") images.push(request.url()); });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/");
+  const hero = page.locator('.screenshot-panel[data-state="active"] img');
+  await expect.poll(() => hero.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+  expect(await hero.evaluate((image: HTMLImageElement) => image.currentSrc)).toMatch(/mac-hero-640\.(avif|webp)$/);
+  expect(images.some((url) => url.endsWith("/mac-hero.png"))).toBe(false);
+  expect(images.filter((url) => /mac-hero-\d+\./.test(url))).toHaveLength(1);
 });
 
 test("hydration preserves the static page without browser errors", async ({ page }) => {

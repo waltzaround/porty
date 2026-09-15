@@ -58,10 +58,9 @@ try {
     assert.notEqual(await page.locator(".zoom-value").textContent(), zoomed);
     await page.getByRole("button", { name: "Fit view", exact: true }).click();
   }
-  const hub = page
-    .locator(".topology-node.hub")
-    .filter({ hasText: "USB2.0 Hub" })
-    .first();
+  const hub = page.locator(".topology-node.hub").first();
+  const hubName = await hub.locator("strong").textContent();
+  assert.ok(hubName, "A connected hub is required for this live smoke test");
   await hub.click();
   await page.getByRole("button", { name: "Focus on this branch" }).click();
   await expect(
@@ -80,10 +79,10 @@ try {
   ).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(link).toBeFocused();
-  await page.getByRole("textbox", { name: "Search ports" }).fill("C922");
+  await page.getByRole("textbox", { name: "Search ports" }).fill(hubName);
   await expect(
     page.getByRole("button", {
-      name: "Inspect C922 Pro Stream Webcam",
+      name: `Inspect ${hubName}`,
       exact: true,
     }),
   ).toBeVisible();

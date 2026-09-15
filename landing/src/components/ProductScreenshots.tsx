@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import { Expand, LayoutGrid, Network, PanelRight } from "lucide-react";
+import { HeroImage } from "./HeroImage";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -73,14 +74,14 @@ export function ProductScreenshots() {
                 onClick={() => setOpen(true)}
                 aria-label={`Enlarge ${shot.label.toLowerCase()} screenshot`}
               >
-                <img
+                {shot.id === "map" ? <HeroImage alt={shot.alt} /> : <img
                   src={shot.src}
                   width="1440"
                   height="900"
                   alt={shot.alt}
                   loading={shot.id === "map" ? "eager" : "lazy"}
                   fetchPriority={shot.id === "map" ? "high" : "auto"}
-                />
+                />}
                 <span className="enlarge-hint">
                   <Expand size={13} />
                   Enlarge
@@ -105,12 +106,12 @@ export function ProductScreenshots() {
             </DialogDescription>
           </DialogHeader>
           <div className="screenshot-lightbox-scroll">
-            <img
+            {current.id === "map" ? <HeroImage alt={current.alt} enlarged /> : <img
               src={current.src}
               width="1440"
               height="900"
               alt={current.alt}
-            />
+            />}
           </div>
         </DialogContent>
       </Dialog>

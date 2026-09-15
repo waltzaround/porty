@@ -37,6 +37,6 @@ export const questions = [
   ],
   [
     "How do I get the app?",
-    "Choose Get Porty to see the available builds for your platform. The app is currently in preview. Download links will appear as releases become available; signing and wider hardware validation are still being prepared.",
+    "Choose Get Porty to download the current preview for macOS Apple Silicon, macOS Intel, or Windows 64-bit. Mac builds require macOS 12 or later. These previews are unsigned; publisher signing and wider hardware validation are still in progress. Check the download options for the current release and platform requirements.",
   ],
 ] as const;

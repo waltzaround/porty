@@ -24,6 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductScreenshots } from "@/components/ProductScreenshots";
+import { GuideCards } from "@/components/Guides";
 import { releases, releaseVersion, macPreview } from "@/lib/releases";
 import { trackDownload } from "@/lib/analytics";
 import { product, questions } from "@/lib/product";
@@ -140,6 +141,7 @@ function App() {
             <a href="#features">Features</a>
             <a href="#in-action">Screenshots</a>
             <a href="#questions">FAQ</a>
+            <a href="/guides/">Guides</a>
           </nav>
           <div className="header-actions">
             <Button asChild className="nav-download">
@@ -166,6 +168,7 @@ function App() {
               ["Features", "#features"],
               ["Screenshots", "#in-action"],
               ["FAQ", "#questions"],
+              ["Guides", "/guides/"],
             ].map(([name, href]) => (
               <a key={href} href={href} onClick={() => setMobileOpen(false)}>
                 {name}
@@ -179,12 +182,10 @@ function App() {
         <section className="hero container">
           <div className="hero-heading">
             <h1>
-              Know your
+              Explore USB ports
               <br />
-              <span>connections.</span>
-              <span className="headline-port" aria-hidden="true">
-                <span />
-              </span>
+              <span>and connected devices.</span>
+              <small>On Mac and Windows.</small>
             </h1>
           </div>
           <div className="hero-aside">
@@ -281,7 +282,7 @@ function App() {
             </article>
           </div>
         </section>
-        <section className="privacy-section">
+        <section className="privacy-section" id="privacy">
           <div className="container privacy-inner">
             <div className="privacy-emblem" aria-hidden="true">
               <Fingerprint size={61} strokeWidth={1} />
@@ -311,6 +312,16 @@ function App() {
               </button>
             </div>
           </div>
+        </section>
+        <section className="container guides-section" aria-labelledby="guides-heading">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">Understand your setup</span>
+              <h2 id="guides-heading">A little less guesswork.</h2>
+            </div>
+            <a href="/guides/">All hardware guides <ArrowUpRight size={16} aria-hidden="true" /></a>
+          </div>
+          <GuideCards />
         </section>
         <section className="faq-section container" id="questions">
           <div>
@@ -366,6 +377,8 @@ function App() {
           </div>
           <nav aria-label="Footer navigation">
             <a href="#features">The app</a>
+            <a href="/guides/">Guides</a>
+            <a href="https://github.com/waltzaround/porty">GitHub</a>
             <button onClick={() => openInfo("release")}>Release notes</button>
             <button onClick={() => openInfo("privacy")}>Privacy</button>
             <a href="#top">

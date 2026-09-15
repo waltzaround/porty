@@ -96,7 +96,7 @@
   width: 100%;
   cursor: zoom-in !important;
 }
-.screenshot-frame > img {
+.screenshot-frame img {
   width: 100%;
   height: auto;
   display: block;
