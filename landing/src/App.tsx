@@ -3,6 +3,7 @@ import {
   ArrowDown,
   ArrowDownToLine,
   ArrowUpRight,
+  Cable,
   Check,
   ChevronDown,
   Fingerprint,
@@ -182,9 +183,9 @@ function App() {
         <section className="hero container">
           <div className="hero-heading">
             <h1>
-              Explore USB ports
+              Explore all your
               <br />
-              <span>and connected devices.</span>
+              <span>hardware connections.</span>
               <small>On Mac and Windows.</small>
             </h1>
           </div>
@@ -212,7 +213,7 @@ function App() {
         >
           <div>
             <Usb />
-            USB-C
+            USB
           </div>
           <div>
             <Zap />
@@ -224,6 +225,10 @@ function App() {
           </div>
           <div>
             <Network />
+            Ethernet
+          </div>
+          <div>
+            <Cable />
             Hubs & docks
           </div>
         </section>
@@ -233,8 +238,8 @@ function App() {
               <h2>Ports, devices, and connections.</h2>
             </div>
             <p>
-              Follow USB connections through hubs and inspect the readings your
-              system reports.
+              Check device links, display modes, and network status across your
+              connected hardware.
             </p>
           </div>
           <div className="feature-grid">
@@ -260,7 +265,7 @@ function App() {
               <div className="feature-copy">
                 <h3>Device details</h3>
                 <p>
-                  Inspect a device’s current link and reported downstream ports.
+                  Inspect link speeds, display modes, and network status.
                 </p>
               </div>
               <div className="feature-real-details">

@@ -53,7 +53,7 @@ export function GuideIndex() {
       <GuideHeader />
       <main className="container guide-index" id="main">
         <p className="eyebrow">Practical hardware guides</p>
-        <h1>Make sense of your USB connections.</h1>
+        <h1>Make sense of your hardware connections.</h1>
         <p className="guide-intro">Find a device, follow its hub, and understand the speed your computer reports. Start with these step-by-step guides for Mac and Windows.</p>
         <GuideCards />
         <p className="guide-index-note">Written for Porty’s preview release. Hardware readings vary by computer, cable, and device; each guide explains what a reading can and cannot tell you.</p>

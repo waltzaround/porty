@@ -1262,9 +1262,6 @@ h1 > span:not(.headline-port) {
   .connector-strip > div {
     font-size: 10px;
   }
-  .connector-strip > div:last-child {
-    display: none;
-  }
   .section-heading h2 {
     font-size: 35px;
   }

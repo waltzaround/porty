@@ -34,7 +34,7 @@ test("FAQs and platform downloads are usable without JavaScript", async ({ brows
   const page = await context.newPage();
   try {
     await page.goto("/");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("Explore USB ports");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("hardware connections.");
     const answer = page.getByRole("region", { name: questions[1][0] });
     await expect(answer).not.toBeVisible();
     await page.locator("summary", { hasText: questions[1][0] }).click();

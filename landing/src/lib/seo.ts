@@ -40,7 +40,7 @@ function pageDetails(path: string) {
   const guide = guideForPath(path);
   if (guide) return { title: `${guide.title} — Porty`, description: guide.description, guide };
   if (path === "/guides/") return {
-    title: "USB Hardware Guides for Mac and Windows — Porty",
+    title: "Hardware Connection Guides for Mac and Windows — Porty",
     description: "Practical guides to checking USB connection speeds, viewing device trees, and tracing hub connections on macOS and Windows.",
   };
   return { title: product.title, description: product.description };
@@ -160,7 +160,7 @@ export function crawlFiles(site: SiteSettings, version: string, releases: Releas
       `Version ${version}. Preview release. Public signing and broader hardware validation are in progress.`,
       "",
       "## Website",
-      `- [Porty](${location("")}): Product overview and actual Windows app screenshots.`,
+      `- [Porty](${location("")}): Hardware connection explorer for Mac and Windows.`,
       `- [Features](${location("#features")}): Connection map and device details.`,
       `- [Questions](${location("#questions")}): Compatibility, hardware limits, and privacy.`,
       `- [Downloads](${location("#download")}): macOS Apple Silicon, macOS Intel, and Windows 64-bit builds.`,

@@ -1,14 +1,14 @@
 export const product = {
   name: "Porty",
-  title: "Porty — USB Port & Device Explorer for macOS and Windows",
+  title: "Porty — Hardware Connection Explorer for Mac and Windows",
   description:
-    "Explore USB ports, connected devices and hub connections on macOS and Windows. Inspect reported link speeds and display modes with Porty’s local desktop app.",
+    "Explore your hardware connections on Mac and Windows. Inspect USB, Thunderbolt, displays, network adapters, hubs, and connected devices.",
   summary:
-    "Explore the ports, devices, hubs, and displays on your Mac or Windows PC. See hardware specifications, supported features, and how your devices are connected.",
+    "See your devices, displays, and network connections in one place. Inspect USB, Thunderbolt, hubs, and docks on Mac and Windows.",
   features: [
     "USB connection map with hub branches, zoom, and device search",
-    "Port inventory and connected-device details",
-    "Reported USB link speeds and downstream hub ports",
+    "USB and Thunderbolt ports, displays, and network adapters",
+    "Reported link speeds, network status, and downstream hub ports",
     "Active display resolution and refresh rate",
     "Local, read-only hardware scans without an account or remote telemetry",
   ],
@@ -17,7 +17,7 @@ export const product = {
 export const questions = [
   [
     "What exactly does Porty do?",
-    "Porty reads the hardware information your operating system reports and puts it in one place. Explore connectors, inspect connected devices, check current data links and display modes, and follow USB connections through hubs.",
+    "Porty brings your computer’s hardware connections into one view. Inspect USB and Thunderbolt devices, displays, and network adapters, then follow connected devices through hubs and docks.",
   ],
   [
     "Does it work with my computer?",
