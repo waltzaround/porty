@@ -1,5 +1,7 @@
 # WhatCable
 
+WhatCable by Darryl Morley provided both code and inspiration for Porty's approach to explaining USB-C connections. Visit [WhatCable](https://github.com/darrylmorley/whatcable) and [whatcable.uk](https://whatcable.uk).
+
 Porty's macOS power and cable decoder is adapted from [WhatCable](https://github.com/darrylmorley/whatcable), commit `3810eda84e415ad76616d361bb7c4d4126fd1024`.
 
 Copyright (c) 2026 Darryl Morley. Used under the MIT licence; the full licence is included in `licenses/WhatCable.txt`.
