@@ -81,7 +81,7 @@ export function structuredData(site: SiteSettings, version: string, path = "/") 
         releaseNotes: "Preview release; public signing and broader hardware validation are in progress.",
         featureList: product.features,
         image: absolute("porty.svg"),
-        screenshot: site.url ? ["branch", "ports", "details"].map((name) => absolute(`screenshots/${name}.png`)) : undefined,
+        screenshot: site.url ? ["mac-ports", "mac-hero", "details"].map((name) => absolute(`screenshots/${name}.png`)) : undefined,
       }] : page.guide ? [{
         "@type": "Article",
         "@id": absolute(`${path}#article`),
@@ -113,7 +113,7 @@ export function structuredData(site: SiteSettings, version: string, path = "/") 
 export function renderMetadata(site: SiteSettings, version: string, path = "/"): string {
   const page = pageDetails(path);
   const canonical = site.url ? new URL(path, site.url).href : undefined;
-  const image = site.url ? new URL("screenshots/mac-hero.png", site.url).href : undefined;
+  const image = site.url ? new URL("screenshots/mac-ports.png", site.url).href : undefined;
   const meta = (key: string, value: string, property = false) =>
     `<meta ${property ? "property" : "name"}="${key}" content="${escapeHtml(value)}" />`;
   return [
@@ -135,11 +135,11 @@ export function renderMetadata(site: SiteSettings, version: string, path = "/"):
     ...(image ? [
       meta("og:image", image, true),
       meta("og:image:type", "image/png", true),
-      meta("og:image:width", "1440", true),
-      meta("og:image:height", "900", true),
-      meta("og:image:alt", "Generated Porty hero based on a live MacBook Pro screenshot, showing USB hubs, a Dell monitor, and an Ethernet adapter.", true),
+      meta("og:image:width", "1180", true),
+      meta("og:image:height", "820", true),
+      meta("og:image:alt", "Porty's Mac Port Explorer showing USB-C, HDMI, SD card, audio, and MagSafe connections.", true),
       meta("twitter:image", image),
-      meta("twitter:image:alt", "Generated Porty hero based on a live MacBook Pro screenshot, showing USB hubs, a Dell monitor, and an Ethernet adapter."),
+      meta("twitter:image:alt", "Porty's Mac Port Explorer showing USB-C, HDMI, SD card, audio, and MagSafe connections."),
     ] : []),
     `<link rel="alternate" type="text/markdown" href="/llms.txt" title="Porty product information" />`,
     ...(path === "/" ? [`<link rel="preload" as="image" type="image/avif" imagesrcset="${escapeHtml(heroSrcSet("avif"))}" imagesizes="${escapeHtml(heroSizes)}" fetchpriority="high" />`] : []),

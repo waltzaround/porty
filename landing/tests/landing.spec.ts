@@ -33,23 +33,28 @@ test("real screenshots switch and enlarge with focus restored", async ({
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/");
-  await page.getByRole("tab", { name: "Port explorer", exact: true }).click();
+  await expect(page.getByRole("tab").first()).toHaveText("Port explorer");
+  await expect(page.getByRole("tab", { name: "Port explorer", exact: true })).toHaveAttribute("aria-selected", "true");
+  await expect(page.locator(".screenshot-platform")).toHaveText("macOS · Light appearance");
   const image = page.locator('.screenshot-panel[data-state="active"] img');
-  await expect(image).toHaveAttribute("src", "/screenshots/ports.png");
+  await expect(image).toHaveAttribute("src", "/screenshots/mac-ports-1180.webp");
   await expect
     .poll(() =>
-      image.evaluate((element: HTMLImageElement) => element.naturalWidth),
+      image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0),
     )
-    .toBe(1440);
+    .toBe(true);
   const enlarge = page.getByRole("button", {
     name: "Enlarge port explorer screenshot",
   });
   await enlarge.click();
   await expect(page.getByRole("dialog")).toContainText(
-    "Windows app screenshot",
+    "Mac app screenshot",
   );
   await page.keyboard.press("Escape");
   await expect(enlarge).toBeFocused();
+  await page.getByRole("tab", { name: "Connection map", exact: true }).click();
+  await expect(image).toHaveAttribute("src", "/screenshots/mac-hero-1440.webp");
+  await expect(page.locator(".screenshot-platform")).toHaveText("macOS · Dark appearance");
   await page.getByRole("tab", { name: "Device details", exact: true }).click();
   await expect(
     page.locator('.screenshot-panel[data-state="active"] img'),
@@ -119,7 +124,7 @@ for (const width of [390, 768, 1440]) {
         page.getByRole("navigation", { name: "Mobile navigation" }),
       ).not.toBeVisible();
       await page
-        .getByRole("button", { name: "Enlarge connection map screenshot" })
+        .getByRole("button", { name: "Enlarge port explorer screenshot" })
         .click();
       await expect(page.getByRole("dialog")).toBeVisible();
       await page.keyboard.press("Escape");

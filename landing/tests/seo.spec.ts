@@ -106,9 +106,9 @@ test("the hero uses a responsive modern image without fetching the original PNG"
   await page.goto("/");
   const hero = page.locator('.screenshot-panel[data-state="active"] img');
   await expect.poll(() => hero.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
-  expect(await hero.evaluate((image: HTMLImageElement) => image.currentSrc)).toMatch(/mac-hero-640\.(avif|webp)$/);
-  expect(images.some((url) => url.endsWith("/mac-hero.png"))).toBe(false);
-  expect(images.filter((url) => /mac-hero-\d+\./.test(url))).toHaveLength(1);
+  expect(await hero.evaluate((image: HTMLImageElement) => image.currentSrc)).toMatch(/mac-ports-640\.(avif|webp)$/);
+  expect(images.some((url) => /\/mac-(ports|hero)\.png$/.test(url))).toBe(false);
+  expect(images.filter((url) => /mac-(ports|hero)-\d+\./.test(url))).toHaveLength(1);
 });
 
 test("hydration preserves the static page without browser errors", async ({ page }) => {
@@ -116,8 +116,8 @@ test("hydration preserves the static page without browser errors", async ({ page
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   await page.goto("/");
-  await page.getByRole("tab", { name: "Port explorer", exact: true }).click();
-  await expect(page.locator('.screenshot-panel[data-state="active"] img')).toHaveAttribute("src", "/screenshots/ports.png");
+  await page.getByRole("tab", { name: "Connection map", exact: true }).click();
+  await expect(page.locator('.screenshot-panel[data-state="active"] img')).toHaveAttribute("src", "/screenshots/mac-hero-1440.webp");
   await page.getByRole("link", { name: "Get Porty", exact: true }).first().click();
   await expect(page.getByRole("dialog")).toBeVisible();
   await page.keyboard.press("Escape");
@@ -139,7 +139,7 @@ test("crawl files agree with the built HTML and published product facts", async 
     expect(sitemap.status()).toBe(200);
     expect(await sitemap.text()).toContain(`<loc>${canonical![1]}</loc>`);
     expect(await robots.text()).toContain(`Sitemap: ${canonical![1]}sitemap.xml`);
-    expect(html).toContain(`property="og:image" content="${canonical![1]}screenshots/mac-hero.png"`);
+    expect(html).toContain(`property="og:image" content="${canonical![1]}screenshots/mac-ports.png"`);
   } else {
     expect(html).toContain('content="noindex, follow"');
     expect(await robots.text()).not.toContain("Sitemap:");
