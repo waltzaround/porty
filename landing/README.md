@@ -4,7 +4,7 @@
 
 The site is hosted with Cloudflare Workers static assets at **https://porty.walt.online**, using `wrangler.jsonc`. After `npm ci`, run `npx wrangler login` if needed, then `npm run deploy`. This builds the indexable static site and uploads only `dist/` using Wrangler. The domain is configured as a Worker custom domain.
 
-Public build settings and version-specific GitHub download URLs live in `.env.production`; it contains no secrets. Publish the corresponding GitHub release before deploying a new download URL. Windows previews are labelled unsigned; macOS downloads stay unavailable until their URLs are configured.
+Public build settings and version-specific GitHub download URLs live in `.env.production`; it contains no secrets. Publish and verify the corresponding GitHub release assets before deploying new download URLs. Windows and macOS previews are labelled unsigned. Mac downloads offer separate Apple Silicon and Intel builds and require macOS 12 or later.
 
 A standalone Vite + React + TypeScript site with Tailwind CSS 4 and shadcn/ui (Radix) components. It has its own dependency lockfile and does not ship inside the desktop app.
 
@@ -53,11 +53,13 @@ Product facts live in `src/lib/product.ts`; release version and links live in `s
 
 References: [Google JavaScript SEO](https://developers.google.com/search/docs/crawling-indexing/javascript/javascript-seo-basics), [Google AI search guidance](https://developers.google.com/search/docs/fundamentals/ai-optimization-guide), [OpenAI crawlers](https://developers.openai.com/api/docs/bots), [llms.txt proposal](https://llmstxt.org/).
 
-The GitHub landing workflow accepts repository variables `PORTY_SITE_URL`, `PORTY_SITE_INDEXABLE`, `PORTY_DOWNLOAD_WINDOWS`, `PORTY_DOWNLOAD_MAC_ARM64`, `PORTY_DOWNLOAD_MAC_X64`, and `PORTY_RELEASE_VERSION`. Pull-request builds always disable indexing. The workflow produces an artifact; it does not publish the site.
+The GitHub landing workflow reads the committed public `.env.production` settings. Pull-request builds always disable indexing. The workflow builds and tests the site and produces an artifact; deploy the site using Wrangler as described above.
 
 ## Download links
 
-Copy `.env.example` to `.env.local`, add the three public HTTPS artifact URLs, and rebuild. Vite values are public, so never put credentials here. Missing or non-HTTPS URLs show “Coming soon” rather than a broken download. The user is supplying release URLs separately. Update preview-release copy when signed public releases become available.
+Production links point to the versioned Windows setup executable and the Apple Silicon (`mac-arm64.dmg`) and Intel (`mac-x64.dmg`) installers on the same GitHub release. The macOS preview workflow adds both Mac architectures to a published Windows preview; see [RELEASING.md](../RELEASING.md). After the release finishes, update `VITE_RELEASE_VERSION` and all three `VITE_DOWNLOAD_*` URLs in `.env.production`, build and test, then deploy. Keep `VITE_WINDOWS_UNSIGNED` and `VITE_MAC_UNSIGNED` true for previews without publisher signing; update those flags and the preview copy when signed releases become available.
+
+For local overrides, copy `.env.example` to `.env.local`. Vite values are public, so never put credentials here. Missing or non-HTTPS URLs show “Coming soon” rather than a broken download.
 
 ## Design and interaction
 

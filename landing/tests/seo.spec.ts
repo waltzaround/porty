@@ -75,7 +75,7 @@ test("crawl files agree with the built HTML and published product facts", async 
     expect(sitemap.status()).toBe(200);
     expect(await sitemap.text()).toContain(`<loc>${canonical![1]}</loc>`);
     expect(await robots.text()).toContain(`Sitemap: ${canonical![1]}sitemap.xml`);
-    expect(html).toContain(`property="og:image" content="${canonical![1]}screenshots/branch.png"`);
+    expect(html).toContain(`property="og:image" content="${canonical![1]}screenshots/mac-hero.png"`);
   } else {
     expect(html).toContain('content="noindex, follow"');
     expect(await robots.text()).not.toContain("Sitemap:");

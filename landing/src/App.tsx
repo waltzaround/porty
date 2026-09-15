@@ -24,7 +24,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductScreenshots } from "@/components/ProductScreenshots";
-import { releases, releaseVersion } from "@/lib/releases";
+import { releases, releaseVersion, macPreview } from "@/lib/releases";
 import { trackDownload } from "@/lib/analytics";
 import { product, questions } from "@/lib/product";
 
@@ -73,28 +73,36 @@ function WindowsMark() {
 
 function ReleaseOptions({ location }: { location: "page" | "dialog" }) {
   return (
-    <div className="release-list">
-      {releases.map((release) => (
-        <div className="release-option" key={release.id}>
-          <span className="release-os">
-            {release.id === "windows" ? <WindowsMark /> : <AppleMark />}
-          </span>
-          <div>
-            <strong>{release.name}</strong>
-            <span>{release.detail}</span>
+    <>
+      <div className="release-list">
+        {releases.map((release) => (
+          <div className="release-option" key={release.id}>
+            <span className="release-os">
+              {release.id === "windows" ? <WindowsMark /> : <AppleMark />}
+            </span>
+            <div>
+              <strong>{release.name}</strong>
+              <span>{release.detail}</span>
+            </div>
+            {release.url ? (
+              <Button asChild className="release-link">
+                <a href={release.url} onClick={() => trackDownload(release, location)}>
+                  Download <ArrowDownToLine />
+                </a>
+              </Button>
+            ) : (
+              <span className="release-pending">Coming soon</span>
+            )}
           </div>
-          {release.url ? (
-            <Button asChild className="release-link">
-              <a href={release.url} onClick={() => trackDownload(release, location)}>
-                Download <ArrowDownToLine />
-              </a>
-            </Button>
-          ) : (
-            <span className="release-pending">Coming soon</span>
-          )}
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+      {macPreview && (
+        <p className="release-compatibility">
+          Requires macOS 12 or later. Mac previews are not Developer ID signed or
+          notarized; macOS may require approval in Privacy &amp; Security.
+        </p>
+      )}
+    </>
   );
 }
 
@@ -390,8 +398,8 @@ function App() {
           <ReleaseOptions location="dialog" />
           <div className="release-note">
             <p>
-              Preview release. Download links will appear as builds become
-              available.
+              Preview release. Hardware support is still being tested.
+              Updates are installed manually.
             </p>
           </div>
         </DialogContent>

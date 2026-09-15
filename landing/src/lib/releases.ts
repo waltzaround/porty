@@ -10,17 +10,19 @@ function releaseUrl(value: string | undefined) {
   }
 }
 
+export const macPreview = import.meta.env.VITE_MAC_UNSIGNED === "true";
+
 export const releases = [
   {
     id: "mac-arm",
     name: "macOS",
-    detail: "Apple Silicon",
+    detail: macPreview ? "Apple Silicon · Unsigned preview" : "Apple Silicon",
     url: releaseUrl(import.meta.env.VITE_DOWNLOAD_MAC_ARM64),
   },
   {
     id: "mac-intel",
     name: "macOS",
-    detail: "Intel",
+    detail: macPreview ? "Intel · Unsigned preview" : "Intel",
     url: releaseUrl(import.meta.env.VITE_DOWNLOAD_MAC_X64),
   },
   {
