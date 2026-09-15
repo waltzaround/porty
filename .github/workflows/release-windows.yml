@@ -1,0 +1,83 @@
+name: Windows preview release
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-release-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  release:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Validate release version
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $tag = "v$version"
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -ne $tag) { throw 'Tag must match package.json version.' }
+          $existing = git tag --list $tag
+          if ($existing) {
+            $target = git rev-list -n 1 $tag
+            if ($target -ne $env:GITHUB_SHA) { throw 'This version already points to another commit. Bump the version first.' }
+          }
+          "RELEASE_VERSION=$version" >> $env:GITHUB_ENV
+          "RELEASE_TAG=$tag" >> $env:GITHUB_ENV
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+      - run: npm run verify:package
+      - run: npm run test:packaged
+      - run: npm run size:report
+      - name: Prepare public downloads and checksums
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory release/public | Out-Null
+          $version = $env:RELEASE_VERSION
+          Copy-Item -LiteralPath "release/Porty Setup $version.exe" "release/public/Porty-$version-windows-x64-setup.exe"
+          Copy-Item -LiteralPath "release/Porty $version.exe" "release/public/Porty-$version-windows-x64-portable.exe"
+          Get-ChildItem release/public/*.exe | Sort-Object Name | ForEach-Object {
+            "$((Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLower())  $($_.Name)"
+          } | Set-Content release/public/SHA256SUMS.txt -Encoding utf8
+          @"
+          # Porty $version — Windows preview
+
+          Explore your computer's ports, connected devices, and USB hubs.
+
+          - **Installer:** Download the setup EXE for a normal installation.
+          - **Portable:** Download the portable EXE to run without installing.
+          - **Requirements:** Windows 10/11, 64-bit (x64).
+
+          **This preview is unsigned.** Windows may show an unknown-publisher or SmartScreen warning. Hardware support is still being tested. Updates are installed manually.
+
+          SHA-256 checksums are included in SHA256SUMS.txt. macOS downloads are not part of this release.
+
+          Thanks to [WhatCable](https://github.com/darrylmorley/whatcable) by Darryl Morley for code and inspiration.
+          "@ | Set-Content release/notes.md -Encoding utf8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: porty-windows-preview
+          path: release/public/*
+          if-no-files-found: error
+      - name: Publish GitHub prerelease
+        shell: pwsh
+        run: |
+          $files = @(Get-ChildItem release/public/* | ForEach-Object FullName)
+          gh release create $env:RELEASE_TAG @files --repo $env:GITHUB_REPOSITORY --target $env:GITHUB_SHA --title "Porty $env:RELEASE_VERSION — Windows preview" --notes-file release/notes.md --draft --prerelease
+          if ($LASTEXITCODE -ne 0) { throw 'Release upload failed. Existing releases are never overwritten.' }
+          gh release edit $env:RELEASE_TAG --repo $env:GITHUB_REPOSITORY --draft=false --prerelease --latest=false
+          if ($LASTEXITCODE -ne 0) { throw 'Could not publish the completed draft release.' }

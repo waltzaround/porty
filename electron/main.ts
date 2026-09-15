@@ -50,22 +50,11 @@ async function createWindow() {
         : nativeTheme.shouldUseDarkColors
           ? "#202127"
           : "#f5f5f7",
-    titleBarStyle: "hiddenInset",
+    titleBarStyle: process.platform === "win32" ? "default" : "hiddenInset",
     ...(process.platform === "darwin"
       ? {
           vibrancy: "sidebar" as const,
           trafficLightPosition: { x: 16, y: 18 },
-        }
-      : {}),
-    ...(process.platform === "win32"
-      ? {
-          titleBarOverlay: {
-            color: nativeTheme.shouldUseDarkColors ? "#202127" : "#f5f5f7",
-            symbolColor: nativeTheme.shouldUseDarkColors
-              ? "#f1f1f3"
-              : "#242426",
-            height: 52,
-          },
         }
       : {}),
     webPreferences: {
@@ -73,6 +62,7 @@ async function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
+      devTools: !app.isPackaged,
     },
   });
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: "deny" }));
@@ -93,10 +83,6 @@ app.whenReady().then(async () => {
     if (process.platform !== "win32" || !mainWindow) return;
     const dark = nativeTheme.shouldUseDarkColors;
     mainWindow.setBackgroundColor(dark ? "#202127" : "#f5f5f7");
-    mainWindow.setTitleBarOverlay({
-      color: dark ? "#202127" : "#f5f5f7",
-      symbolColor: dark ? "#f1f1f3" : "#242426",
-    });
   });
   ipcMain.handle("porty:scan", (event) => {
     validate(event);
@@ -147,8 +133,7 @@ app.whenReady().then(async () => {
       {
         label: "View",
         submenu: [
-          { role: "reload" },
-          { role: "toggleDevTools" },
+          ...(!app.isPackaged ? [{ role: "reload" as const }, { role: "toggleDevTools" as const }] : []),
           { role: "resetZoom" },
           { role: "zoomIn" },
           { role: "zoomOut" },

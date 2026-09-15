@@ -1,5 +1,11 @@
 # Porty landing page
 
+## Production deployment
+
+The site is hosted with Cloudflare Workers static assets at **https://porty.walt.online**, using `wrangler.jsonc`. After `npm ci`, run `npx wrangler login` if needed, then `npm run deploy`. This builds the indexable static site and uploads only `dist/` using Wrangler. The domain is configured as a Worker custom domain.
+
+Public build settings and version-specific GitHub download URLs live in `.env.production`; it contains no secrets. Publish the corresponding GitHub release before deploying a new download URL. Windows previews are labelled unsigned; macOS downloads stay unavailable until their URLs are configured.
+
 A standalone Vite + React + TypeScript site with Tailwind CSS 4 and shadcn/ui (Radix) components. It has its own dependency lockfile and does not ship inside the desktop app.
 
 ## Develop and build

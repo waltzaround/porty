@@ -14,7 +14,15 @@ npm run size:report
 
 These produce unsigned test installers. The standard CI workflow builds actual Windows installers and macOS DMG/ZIP packages, verifies package contents and security settings, and smoke-tests the packaged app. CI smoke checks permit unavailable hardware queries on hosted runners; local smoke checks require successful hardware queries. CI does not replace physical hardware testing.
 
-## Signed Windows release
+## GitHub Windows preview releases
+
+The `Windows preview release` workflow builds the current app on GitHub's Windows runner, runs the parser tests and packaged-app checks, and publishes an explicitly labelled **unsigned prerelease** in `waltzaround/porty`. Trigger it manually on `main` or push a `v*` tag matching `package.json`. A reused version cannot point to a different commit, and existing release assets are never overwritten.
+
+Downloads use `Porty-VERSION-windows-x64-setup.exe` and `Porty-VERSION-windows-x64-portable.exe`, accompanied by `SHA256SUMS.txt`. Only those public files are uploaded; private source maps and scan output are excluded. The release remains a draft until all assets upload successfully.
+
+The website's version-specific Windows URL is configured in `landing/.env.production`. Update it with each release and deploy only after that release is available. `VITE_WINDOWS_UNSIGNED=true` labels the download as an unsigned preview. macOS URLs remain empty until real packages are published.
+
+### Signed builds
 
 Configure a Windows code-signing certificate in the `production` GitHub environment:
 
@@ -23,7 +31,7 @@ Configure a Windows code-signing certificate in the `production` GitHub environm
 
 Keep credentials in the secret store. Do not commit them. Alternatively, provide `CSC_LINK`/`CSC_KEY_PASSWORD` (or `WIN_CSC_LINK`/`WIN_CSC_KEY_PASSWORD`) locally and run `npm run release:win`.
 
-The release command refuses to run without signing credentials, forces signing, checks Authenticode validity on the app, installer and portable EXE, verifies package contents and fuses, and smoke-tests the app. The `Signed Windows release candidate` workflow runs on a `v*` tag or manual dispatch. Tags must match the package version. It uploads artifacts only; publishing is a separate action. Signing-service integrations need their own configuration; no service credentials are configured in this repository.
+The local `release:win` command refuses to run without signing credentials, forces signing, checks Authenticode validity on the app, installer and portable EXE, verifies package contents and fuses, and smoke-tests the app. The GitHub preview workflow intentionally uses unsigned `dist:win` builds instead. Signing-service integrations need their own configuration; no service credentials are configured in this repository.
 
 Increment the version with `npm version patch --no-git-tag-version` (or minor/major), review the package/lockfile changes, commit, then tag the matching version. The UI reads its version from package.json. Version 1.0.1 contains the Windows hardware, node-view and production-hardening updates.
 

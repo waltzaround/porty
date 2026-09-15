@@ -3,11 +3,13 @@ on:
   push:
   pull_request:
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   build:
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        os: [macos-latest, macos-15-intel, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -17,14 +19,23 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      - name: Compile Windows USB helper
+      - name: Build Windows test installers
         if: runner.os == 'Windows'
-        shell: powershell
-        run: Add-Type -Path electron/native/UsbPorts.cs -ErrorAction Stop
-      - run: npm run package
+        run: npm run dist:win
+      - name: Build macOS test packages
+        if: runner.os == 'macOS'
+        run: npm run dist:mac
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: "false"
+      - run: npm run verify:package
+      - run: npm run test:packaged
+      - run: npm run size:report
       - uses: actions/upload-artifact@v4
         with:
-          name: porty-${{ runner.os }}
-          path: release/
+          name: porty-${{ matrix.os }}-unsigned-test
+          path: |
+            release/*.exe
+            release/*.dmg
+            release/*.zip
+            release/size-report.json
+          if-no-files-found: error

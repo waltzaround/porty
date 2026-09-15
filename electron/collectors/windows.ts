@@ -4,6 +4,8 @@ import { command } from "./command";
 import { detected, unknown } from "../../shared/profiles";
 import type { Connector, Port, Scan } from "../../shared/types";
 import { getDisplaySupport } from "../../shared/display";
+import { windowsTopology } from "./windows-topology";
+import { parseWindowsDisplays, type WindowsDisplay } from "./windows-displays";
 export interface WindowsPort {
   Hub: string;
   Number: number;
@@ -18,12 +20,17 @@ export interface WindowsPort {
   Speed: number;
   Vid?: string;
   Pid?: string;
+  DriverKey?: string;
 }
-interface WindowsData {
+export interface WindowsData {
+  displays?: { Displays?: WindowsDisplay[]; Warnings?: string[] };
   machine?: { Manufacturer?: string; Model?: string };
   os?: { Caption?: string };
   cpu?: { Name?: string };
-  usb?: { Ports: WindowsPort[]; Warnings?: string[] };
+  usb?: { Ports: WindowsPort[]; Warnings?: string[];
+    Hubs?: { Path: string; InstanceId: string; IsRoot: boolean }[];
+    Devices?: { InstanceId: string; ParentId?: string; DriverKey?: string; Name: string; ContainerId?: string; BusName?: string }[];
+  };
   connectors?: {
     ExternalReferenceDesignator?: string;
     ExternalConnectorType?: number[];
@@ -66,12 +73,14 @@ export function mergeWindowsCompanions(ports: WindowsPort[]): WindowsPort[][] {
 export function parseWindowsScan(data: WindowsData, durationMs = 0): Scan {
   const ports: Port[] = [];
   const raw = data.usb?.Ports ?? [];
-  const warnings = [...(data.warnings ?? []), ...(data.usb?.Warnings ?? [])];
+  const topology = windowsTopology(data);
+  const warnings = [...(data.warnings ?? []), ...(data.usb?.Warnings ?? []), ...(data.displays?.Warnings ?? [])];
   if (raw.some((p) => !p.PropertiesKnown))
     warnings.push(
       "Some hubs do not expose connector properties. Their logical ports are omitted because they cannot be distinguished from internal wiring.",
     );
   for (const group of mergeWindowsCompanions(raw)) {
+    if (!topology.isHost(group)) continue;
     if (!group.some((p) => p.PropertiesKnown && p.UserConnectable)) continue;
     const p = group[0];
     const isC = group.some((p) => p.TypeC);
@@ -84,24 +93,21 @@ export function parseWindowsScan(data: WindowsData, durationMs = 0): Scan {
         ? "available"
         : "unknown";
     const protocol = usb3 ? "USB 3.x" : usb2 ? "USB 2.0" : "USB";
-    const device =
-      active &&
-      (data.devices ?? []).find((d) =>
+    const candidates = active ? (data.devices ?? []).filter((d) =>
         d.PNPDeviceID.toUpperCase().includes(
           `VID_${active.Vid}&PID_${active.Pid}`,
-        ),
-      );
+        ) && !/&MI_/i.test(d.PNPDeviceID),
+      ) : [];
+    const device = candidates.length === 1 ? candidates[0] : undefined;
     const speeds: Record<number, string> = {
       0: "1.5 Mb/s",
       1: "12 Mb/s",
       2: "480 Mb/s",
       3: "5 Gb/s or higher",
     };
-    const link = active
-      ? active.Flags & 4
-        ? "10 Gb/s or higher"
-        : (speeds[active.Speed] ?? "Not reported")
-      : "No data device";
+    const link = active ? [...new Set(group.filter(p => p.Status === 1).map(p =>
+      p.Flags & 4 ? "10 Gb/s or higher" : p.Flags & 1 ? "5 Gb/s or higher" : speeds[p.Speed] ?? "Not reported"
+    ))].join(" + ") : "No data device";
     ports.push({
       id: `win-usb-${createHash("sha256").update(portKey(p.Hub, p.Number)).digest("hex").slice(0, 16)}`,
       name: `${isC ? "USB-C" : "USB"} ${ports.length + 1}`,
@@ -137,7 +143,7 @@ export function parseWindowsScan(data: WindowsData, durationMs = 0): Scan {
         unknown("Charging input"),
         unknown("Power output"),
       ],
-      devices: active
+      devices: topology.enabled ? topology.forPort(group) : active
         ? [
             {
               name: device?.Name ?? `USB device ${active.Vid}:${active.Pid}`,
@@ -202,12 +208,12 @@ export function parseWindowsScan(data: WindowsData, durationMs = 0): Scan {
       platform: "win32",
     },
     ports: ports.map((port) => ({ ...port, display: getDisplaySupport(port) })),
-    devices: (data.devices ?? [])
+    devices: [...parseWindowsDisplays(data.displays?.Displays, topology.containerFor), ...(topology.enabled ? topology.devices : (data.devices ?? [])
       .filter((d) => !/root hub|host controller|composite device/i.test(d.Name))
       .map((d) => ({
         name: d.Name,
         detail: "USB device · physical connection may be listed above",
-      })),
+      })))],
     warnings: [...new Set(warnings)],
     scannedAt: new Date().toISOString(),
     durationMs,

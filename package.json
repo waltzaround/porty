@@ -1,6 +1,6 @@
 {
   "name": "porty",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "Know your connections. A physical port and capability explorer for macOS and Windows.",
   "author": "Porty",
   "private": true,
@@ -9,15 +9,21 @@
   "scripts": {
     "dev": "node scripts/dev.mjs",
     "dev:web": "vite --host 127.0.0.1",
-    "build": "tsc --noEmit && vite build && node scripts/build-electron.mjs && node scripts/build-icons.mjs",
+    "build": "tsc --noEmit && vite build && node scripts/build-electron.mjs && node scripts/build-icons.mjs && node scripts/build-native.mjs && node scripts/build-licenses.mjs",
     "start": "electron .",
     "test": "tsx --test tests/*.test.ts",
     "check": "tsc --noEmit",
     "scan": "tsx scripts/scan.ts",
     "package": "npm run build && electron-builder --dir",
-    "dist:mac": "npm run build && electron-builder --mac",
-    "dist:win": "npm run build && electron-builder --win",
-    "format": "prettier --write src electron shared scripts tests *.json *.ts *.html *.md"
+    "dist:mac": "npm run build && electron-builder --mac --publish never",
+    "dist:win": "npm run build && electron-builder --win --publish never --config.electronDist=node_modules/electron/dist",
+    "release:win": "node scripts/release-windows.mjs",
+    "verify:package": "node scripts/verify-package.mjs",
+    "test:packaged": "node scripts/smoke-packaged.mjs",
+    "size:report": "node scripts/report-size.mjs",
+    "format": "prettier --write src electron shared scripts tests *.json *.ts *.html *.md",
+    "test:ui": "node scripts/smoke-node-view.mjs",
+    "capture:product": "node scripts/capture-product.mjs"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
@@ -26,6 +32,8 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@electron/asar": "3.4.1",
+    "@electron/fuses": "1.8.0",
     "@playwright/test": "^1.55.0",
     "@types/node": "^22.10.0",
     "@types/plist": "^3.0.5",
@@ -42,6 +50,22 @@
     "vite": "^6.4.0"
   },
   "build": {
+    "compression": "maximum",
+    "electronLanguages": [
+      "en",
+      "en-US",
+      "en-GB",
+      "en_US",
+      "en_GB"
+    ],
+    "asar": true,
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    },
     "appId": "app.porty.desktop",
     "productName": "Porty",
     "directories": {
@@ -52,11 +76,20 @@
       "dist-electron/**/*",
       "package.json",
       "THIRD_PARTY_NOTICES.md",
-      "licenses/**/*"
+      "licenses/**/*",
+      "!**/*.map",
+      "!node_modules/**/*",
+      {
+        "from": "build/licenses",
+        "to": "licenses/dependencies",
+        "filter": [
+          "**/*"
+        ]
+      }
     ],
     "extraResources": [
       {
-        "from": "electron/native",
+        "from": "build/native",
         "to": "native"
       },
       {
@@ -65,6 +98,7 @@
       }
     ],
     "mac": {
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}",
       "category": "public.app-category.utilities",
       "target": [
         "dmg",
@@ -80,6 +114,7 @@
       "icon": "build/icon.ico"
     },
     "nsis": {
+      "differentialPackage": false,
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }

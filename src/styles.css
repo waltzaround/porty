@@ -1,6 +1,6 @@
 :root {
   color-scheme: light dark;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: "Segoe UI Variable Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-size: 13px;
   color: var(--text);
   background: transparent;
@@ -18,8 +18,8 @@
   --hover: rgba(0, 0, 0, 0.035);
   --control: rgba(118, 118, 128, 0.12);
   --selected: #fff;
-  --accent: #0069da;
-  --blue: #007aff;
+  --accent: #6554bd;
+  --blue: #6a58c5;
   --green: #248a3d;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
 }
@@ -28,16 +28,16 @@
     --text: #f1f1f3;
     --secondary: #a5a5ae;
     --tertiary: #909099;
-    --surface: #202127;
-    --sidebar: rgba(29, 30, 36, 0.83);
-    --group: #2b2c33;
+    --surface: #211f27;
+    --sidebar: rgba(29, 27, 34, 0.94);
+    --group: #2b2732;
     --border: rgba(255, 255, 255, 0.09);
     --separator: rgba(255, 255, 255, 0.075);
     --hover: rgba(255, 255, 255, 0.045);
     --control: rgba(118, 118, 128, 0.24);
     --selected: #62636b;
-    --accent: #70b3ff;
-    --blue: #0a72eb;
+    --accent: #b5a0ea;
+    --blue: #6d59b6;
     --green: #53c76d;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
   }
@@ -115,6 +115,9 @@ summary svg {
   padding: 12px 11px 0;
   background: var(--sidebar);
   border-right: 1px solid var(--border);
+}
+.app.win32 {
+  grid-template-rows: minmax(0, 1fr);
 }
 .app-titlebar {
   grid-column: 1 / -1;
@@ -1291,28 +1294,6 @@ details[open] > summary > svg:last-child {
 .monitor-summary strong { font-weight: 500; }
 .monitor-summary span { color: var(--secondary); }
 
-.inventory-device { display:flex; width:100%; align-items:center; justify-content:space-between; gap:20px; padding:16px; color:var(--text); background:transparent; border:0; border-bottom:1px solid var(--border); text-align:left; cursor:pointer; font:inherit; }
-.inventory-device:hover { background:var(--hover); }
-.inventory-device small, .topology-node small, .topology-inspector small { display:block; color:var(--secondary); margin-top:5px; font-size:11px; }
-.inventory-device > span:last-child { color:var(--secondary); font-size:11px; }
-.topology-scroll { overflow:auto; max-height:560px; border:1px solid var(--border); border-radius:12px; background:var(--surface); }
-.topology-canvas { position:relative; background-image:radial-gradient(var(--border) 1px, transparent 1px); background-size:20px 20px; }
-.topology-links { position:absolute; inset:0; overflow:visible; }
-.link-hit { fill:none; stroke:transparent; stroke-width:18; cursor:pointer; }
-.link-line { fill:none; stroke:var(--secondary); stroke-width:2; pointer-events:none; }
-.link-line.uncertain { stroke-dasharray:5 5; }
-.topology-links g:hover .link-line, .topology-links g:focus .link-line, .link-line.selected { stroke:var(--accent); stroke-width:4; }
-.topology-node { position:absolute; width:230px; min-height:68px; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--group); color:var(--text); text-align:left; cursor:pointer; box-shadow:var(--shadow); }
-.topology-node strong { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
-.topology-node.hub { border-left:4px solid var(--green); }
-.topology-node.selected, .topology-node:hover { border-color:var(--accent); }
-.topology-inspector { margin-top:18px; padding:20px; border:1px solid var(--border); border-radius:12px; background:var(--group); }
-.topology-inspector h3 { margin-top:0; }
-.topology-inspector p { color:var(--secondary); line-height:1.6; }
-.topology-inspector dl > div { display:grid; grid-template-columns:minmax(120px, 1fr) 2fr; gap:20px; padding:10px 0; border-bottom:1px solid var(--border); }
-.topology-inspector dt { color:var(--secondary); }
-.topology-inspector dd { margin:0; overflow-wrap:anywhere; }
-.inspector-close { float:right; }
 .device-port-group {
   display: flex;
   flex-direction: column;
@@ -1321,4 +1302,30 @@ details[open] > summary > svg:last-child {
 .device-port-group > .machine-summary {
   margin: 0;
   padding: 0 1px;
+}
+
+/* Quiet, consistent chrome around the hardware views. */
+.nav-icon.blue, .connector-usbc, .connector-usba, .connector-usbunclassified { background:#e5dff3; color:#685390; box-shadow:none; }
+.nav-icon.green { background:#e1eadf; color:#5a7a57; box-shadow:none; }
+.nav-icon.gray, .connector-sdcard, .connector-hdmi, .connector-displayport, .connector-displayunclassified { background:#e4e4ea; color:#6e6b80; box-shadow:none; }
+.connector-audio { background:#f0e2e8; color:#9a6c83; box-shadow:none; }
+.connector-ethernet { background:#e9e0f2; color:#87689f; box-shadow:none; }
+.connector-magsafe { background:#e0eadd; color:#65865c; box-shadow:none; }
+.nav-item.active .nav-icon, .nav-item.active .port-glyph { background:#ffffff12; color:#f3edf9; box-shadow:none; }
+.machine-summary > svg { color:var(--accent); }
+.machine-summary > span { padding:5px 9px; border:1px solid var(--border); border-radius:6px; font-size:10px; }
+.toolbar { border-bottom:1px solid var(--separator); margin-bottom:6px; }
+.toolbar-refresh { border:1px solid var(--border); padding:6px 9px; font-size:11px; }
+.settings-group { border-radius:10px; }
+.search-field { height:32px; }
+.sidebar nav h2 { letter-spacing:.2px; margin-top:20px; }
+.nav-item { height:34px; margin:2px 0; }
+@media(prefers-color-scheme:dark) {
+  .nav-icon.blue, .connector-usbc, .connector-usba, .connector-usbunclassified { background:#393043; color:#bfa5dc; }
+  .nav-icon.green { background:#2d3a32; color:#aac7af; }
+  .nav-icon.gray, .connector-sdcard, .connector-hdmi, .connector-displayport, .connector-displayunclassified { background:#33323e; color:#b0acc6; }
+  .connector-audio { background:#3f303a; color:#d0a7bc; }
+  .connector-ethernet { background:#3d3048; color:#bda0d5; }
+  .connector-magsafe { background:#303c2f; color:#adc8a1; }
+  .nav-item.active .nav-icon, .nav-item.active .port-glyph { background:#ffffff12; color:#f3edf9; }
 }

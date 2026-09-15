@@ -1,0 +1,31 @@
+import assert from "node:assert/strict";
+import { readFile, readdir, stat } from "node:fs/promises";
+import path from "node:path";
+import asar from "@electron/asar";
+import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
+import { packagePaths } from "./package-paths.mjs";
+const { executable, resources } = packagePaths();
+const archive = path.join(resources, "app.asar");
+const files = asar.listPackage(archive).map(file => file.replaceAll("\\", "/").replace(/^\//, ""));
+assert.ok(!files.some(file => file.endsWith(".map")), "Source maps must not ship");
+assert.ok(!files.some(file => file.startsWith("node_modules/")), "Bundled dependencies must not also ship as node_modules");
+for (const file of ["dist/index.html", "dist-electron/main.cjs", "dist-electron/preload.cjs", "licenses/dependencies/DEPENDENCIES.txt", "licenses/WhatCable.txt"]) assert.ok(files.includes(file), `Missing ${file}`);
+const html = asar.extractFile(archive, "dist/index.html").toString();
+assert.ok(html.includes("connect-src 'none'"));
+assert.ok(!html.includes("ws://") && !html.includes("localhost") && !html.includes("127.0.0.1"));
+const project = JSON.parse(await readFile("package.json", "utf8"));
+const packaged = JSON.parse(asar.extractFile(archive, "package.json").toString());
+assert.equal(packaged.version, project.version);
+const fuses = await getCurrentFuseWire(executable);
+for (const option of [FuseV1Options.RunAsNode, FuseV1Options.EnableNodeOptionsEnvironmentVariable, FuseV1Options.EnableNodeCliInspectArguments]) assert.equal(fuses[option], 48, `Fuse ${FuseV1Options[option]} must be disabled`);
+for (const option of [FuseV1Options.EnableEmbeddedAsarIntegrityValidation, FuseV1Options.OnlyLoadAppFromAsar]) assert.equal(fuses[option], 49, `Fuse ${FuseV1Options[option]} must be enabled`);
+if (process.platform === "win32") {
+  const locales = await readdir(path.resolve(resources, "../locales"));
+  assert.ok(locales.includes("en-US.pak"));
+  assert.ok(locales.every(file => /^en-(US|GB)\.pak$/.test(file)), "Unexpected Chromium language pack");
+  const native = await readdir(path.join(resources, "native"));
+  assert.ok(native.includes("Porty.Native.dll") && native.includes("scan-windows.ps1"));
+  assert.ok(!native.some(file => file.endsWith(".cs")));
+}
+assert.ok((await stat(archive)).size < 1024 * 1024, "Application archive exceeded its 1 MiB size budget");
+console.log(`Verified ${project.version}: no source maps or duplicate node_modules; licence notices present; production CSP; security fuses; native helper. Archive: ${((await stat(archive)).size / 1024 / 1024).toFixed(2)} MiB.`);

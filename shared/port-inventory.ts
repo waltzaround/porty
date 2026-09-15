@@ -1,4 +1,5 @@
 import type { ConnectedDevice, Connector, Port, Scan } from './types';
+import { monitorAssociations } from './monitor-associations';
 
 export interface DevicePortGroup { id: string; name: string; detail: string; ports: Port[] }
 type Hub = { key: string; branches: ConnectedDevice[] };
@@ -34,6 +35,18 @@ function companionHubs(devices: ConnectedDevice[]): Hub[] {
 export function portInventory(scan: Scan): DevicePortGroup[] {
   const groups: DevicePortGroup[] = [{ id: 'host', name: scan.machine.name, detail: 'Built-in ports', ports: scan.ports }];
   const attached = scan.ports.flatMap(p => p.devices);
+  const associations = monitorAssociations([...attached, ...scan.devices]);
+  const enclosures = new Map<string, DevicePortGroup>();
+  function enclosure(device: ConnectedDevice) {
+    const display = device.id ? associations.get(device.id) : undefined;
+    if (!display) return undefined;
+    if (!enclosures.has(display.id!)) {
+      const target = { id: `monitor:${display.id}`, name: display.name, detail: 'Display and USB hub matched by physical device identity', ports: [] };
+      enclosures.set(display.id!, target);
+      groups.push(target);
+    }
+    return enclosures.get(display.id!);
+  }
   const unmapped = scan.devices.filter(d => !attached.some(a => d.id ? a.id === d.id : a.name === d.name && a.detail === d.detail));
   const sources = [...scan.ports.map(port => ({ port, devices: port.devices })), { port: undefined, devices: unmapped }];
   for (const { port, devices: input } of sources) {
@@ -62,6 +75,8 @@ export function portInventory(scan: Scan): DevicePortGroup[] {
     }
     function owner(hub: Hub) {
       const root = ancestorHub(hub);
+      const matched = root.branches.map(enclosure);
+      if (matched[0] && matched.every(group => group === matched[0])) return matched[0];
       if (monitor && root.branches.every(d => !d.parentId && !d.parentName))
         return group(monitor.id ?? monitor.name, monitor.name, `${baseDetail} · Display and USB share this connection`);
       const first = root.branches[0];
@@ -95,13 +110,13 @@ export function portInventory(scan: Scan): DevicePortGroup[] {
     for (const [i, device] of devices.entries()) {
       if (device.kind === 'power' || device.kind === 'hub') continue;
       if (device.kind === 'display') {
-        const target = group(device.id ?? device.name, device.name, monitor === device ? `${baseDetail} · Display and USB share this connection` : baseDetail);
-        target.ports.push(row(`${target.id}:display`, 'Active display input', 'Display (unclassified)', [device], 'connected', 'Current display route. USB components in this group share the host connection; the operating system does not identify every enclosure boundary.'));
+        const target = enclosure(device) ?? group(device.id ?? device.name, device.name, monitor === device ? `${baseDetail} · Display and USB share this connection` : port ? baseDetail : `${device.detail} · Host socket not reported`);
+        target.ports.push(row(`${target.id}:display`, 'Active display input', 'Display (unclassified)', [device], 'connected', device.id && associations.has(device.id) ? 'Display and USB hub share an OS-reported physical device identity. Each connection keeps its own upstream route; the display host socket may be unreported.' : port ? 'Current display route. USB components in this group share the host connection; the operating system does not identify every enclosure boundary.' : 'Active display reported by the operating system. Physical host socket and USB hub ownership are not reported.'));
       } else if (networkDevice(device)) {
         const parent = device.parentId ? hubByDevice.get(device.parentId) : undefined;
         const target = device.usb?.internal === true && parent ? owner(parent) : group(device.id ?? `network-${i}`, device.name, device.parentName ? `Via ${device.parentName}${port ? ` · ${port.name}` : ''}` : baseDetail);
         target.ports.push(row(`${target.id}:ethernet:${device.id ?? i}`, 'Ethernet', 'Ethernet', [device], 'unknown', 'One detected Ethernet adapter. Its USB interfaces are part of this adapter. Cable presence and network link speed are not reported by the USB inventory.'));
-      } else if (!port && !device.parentId && !device.parentName) {
+      } else if (!port && !device.parentId && !device.parentName && device.usb?.internal !== true) {
         const target = group(device.id ?? `usb-${i}`, device.name);
         target.ports.push(row(`${target.id}:connection`, 'Detected USB connection', 'USB (unclassified)', [device], 'connected', 'Device reported in system inventory. Physical upstream port and connector shape are not reported.'));
       }

@@ -770,7 +770,7 @@ export default function App() {
           : connectorLabel(connector);
   return (
     <div className={`app ${window.porty?.platform ?? "browser"}`}>
-      <header className="app-titlebar" aria-label="Application title bar">
+      {window.porty?.platform !== "win32" && <header className="app-titlebar" aria-label="Application title bar">
         {!window.porty && (
           <span className="traffic-lights" aria-hidden="true">
             <i />
@@ -779,7 +779,7 @@ export default function App() {
           </span>
         )}
         <span>Porty</span>
-      </header>
+      </header>}
       <aside className="sidebar">
         <div className="search-field">
           <Search size={14} />
@@ -788,7 +788,7 @@ export default function App() {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setView("ports");
+              if (view !== "devices") setView("ports");
             }}
             placeholder="Search"
             aria-label="Search ports"
@@ -857,7 +857,7 @@ export default function App() {
             </span>
             <span>Connection guide</span>
           </button>
-          <span className="version">Porty 1.0</span>
+          <span className="version">Porty {__APP_VERSION__}</span>
         </div>
       </aside>
       <div className="main-shell">
@@ -919,7 +919,7 @@ export default function App() {
                 {view === "devices" ? (
                   <>
                     <DeviceHeader name={scan.machine.name} detail={`${scan.machine.chip || scan.machine.model} · ${scan.machine.os}`} kind="computer" summary={`${ports.length} ports · ${devices.length} devices`} />
-                    <DeviceViews ports={hostPorts} devices={devices} />
+                    <DeviceViews ports={hostPorts} devices={devices} query={query} />
                   </>
                 ) : (
                   <>

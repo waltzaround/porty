@@ -77,6 +77,8 @@ export interface ConnectedDevice {
   kind?: "device" | "hub" | "power" | "display";
   parentName?: string;
   parentId?: string;
+  // Scan-local token for an OS-reported physical enclosure identity.
+  physicalDeviceId?: string;
   usb?: {
     // Scan-local grouping token; the hardware's raw container ID is not exposed.
     containerId?: string;
