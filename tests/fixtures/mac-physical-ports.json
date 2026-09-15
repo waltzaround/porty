@@ -1,0 +1,169 @@
+[
+  {
+    "ConnectionActive": false,
+    "IOObjectClass": "AppleSDXCSlot",
+    "PortNumber": 1,
+    "PortTypeDescription": "SD Card",
+    "TransportsActive": [],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOPortTransportStateSD"
+      },
+      {
+        "IOObjectClass": "AppleSDXCBlockStorageDevice",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOBlockStorageDriver"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "ConnectionActive": false,
+    "IOObjectClass": "AppleHDMIPortController",
+    "PortNumber": 1,
+    "PortTypeDescription": "HDMI",
+    "TransportsActive": [],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOPortTransportStateDisplayPort"
+      }
+    ]
+  },
+  {
+    "ActiveCable": false,
+    "ConnectionActive": false,
+    "IOObjectClass": "AppleHPMInterfaceType10",
+    "OpticalCable": false,
+    "PortNumber": 1,
+    "PortTypeDescription": "USB-C",
+    "TransportsActive": [],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOPortTransportStateCC"
+      },
+      {
+        "IOObjectClass": "AppleHPMLDCMType2",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOPortFeatureLDCMUserClient"
+          }
+        ]
+      },
+      {
+        "IOObjectClass": "IOPortFeaturePowerIn"
+      }
+    ]
+  },
+  {
+    "ActiveCable": false,
+    "ConnectionActive": false,
+    "IOObjectClass": "AppleHPMInterfaceType10",
+    "OpticalCable": false,
+    "PortNumber": 2,
+    "PortTypeDescription": "USB-C",
+    "TransportsActive": [],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOPortTransportStateCC"
+      },
+      {
+        "IOObjectClass": "AppleHPMLDCMType2",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOPortFeatureLDCMUserClient"
+          }
+        ]
+      },
+      {
+        "IOObjectClass": "IOPortFeaturePowerIn"
+      }
+    ]
+  },
+  {
+    "ActiveCable": false,
+    "ConnectionActive": false,
+    "IOObjectClass": "AppleHPMInterfaceType11",
+    "OpticalCable": false,
+    "PortNumber": 1,
+    "PortTypeDescription": "MagSafe 3",
+    "TransportsActive": [],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOPortTransportStateCC"
+      },
+      {
+        "IOObjectClass": "IOPortFeaturePowerIn"
+      }
+    ]
+  },
+  {
+    "ActiveCable": false,
+    "ConnectionActive": true,
+    "IOObjectClass": "AppleHPMInterfaceType10",
+    "OpticalCable": false,
+    "PortNumber": 3,
+    "PortTypeDescription": "USB-C",
+    "TransportsActive": ["CC"],
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "AppleHPMLDCMType2",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOPortFeatureLDCMUserClient"
+          }
+        ]
+      },
+      {
+        "IOObjectClass": "IOPortTransportStateCC",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOPortTransportComponentCCUSBPDSOP",
+            "IORegistryEntryChildren": [
+              {
+                "IOObjectClass": "IOPortTransportProtocolAppleUVDM",
+                "ParentComponentName": "SOP",
+                "User String": "96W USB-C Power Adapter",
+                "Vendor": "Apple Inc.",
+                "IORegistryEntryChildren": [
+                  {
+                    "IOObjectClass": "AppleUVDMEndpoint"
+                  },
+                  {
+                    "IOObjectClass": "AppleUVDMEndpoint"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "IOObjectClass": "IOPortTransportComponentCCUSBPDSOPp"
+          }
+        ]
+      },
+      {
+        "IOObjectClass": "IOPortFeaturePowerIn",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "IOPortFeaturePowerSource",
+            "PowerSourceName": "USB-PD",
+            "WinningPowerSourceOption": {
+              "Max Current (mA)": 4700,
+              "Max Power (mW)": 94000,
+              "Voltage (mV)": 20000
+            }
+          },
+          {
+            "IOObjectClass": "IOPortFeaturePowerSource",
+            "PowerSourceName": "Brick ID"
+          },
+          {
+            "IOObjectClass": "IOPortFeaturePowerSource",
+            "PowerSourceName": "TypeC"
+          }
+        ]
+      }
+    ]
+  }
+]

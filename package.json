@@ -1,0 +1,87 @@
+{
+  "name": "porty",
+  "version": "1.0.0",
+  "description": "Know your connections. A physical port and capability explorer for macOS and Windows.",
+  "author": "Porty",
+  "private": true,
+  "type": "module",
+  "main": "dist-electron/main.cjs",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "dev:web": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build && node scripts/build-electron.mjs && node scripts/build-icons.mjs",
+    "start": "electron .",
+    "test": "tsx --test tests/*.test.ts",
+    "check": "tsc --noEmit",
+    "scan": "tsx scripts/scan.ts",
+    "package": "npm run build && electron-builder --dir",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "format": "prettier --write src electron shared scripts tests *.json *.ts *.html *.md"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "plist": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^22.10.0",
+    "@types/plist": "^3.0.5",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^41.0.0",
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.0",
+    "prettier": "^3.9.6",
+    "sharp": "^0.35.4",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vite": "^6.4.0"
+  },
+  "build": {
+    "appId": "app.porty.desktop",
+    "productName": "Porty",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "THIRD_PARTY_NOTICES.md",
+      "licenses/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "electron/native",
+        "to": "native"
+      },
+      {
+        "from": "build/icon.png",
+        "to": "icon.png"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
