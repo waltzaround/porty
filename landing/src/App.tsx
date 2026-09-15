@@ -8,12 +8,10 @@ import {
   ChevronDown,
   Fingerprint,
   LockKeyhole,
-  Menu,
   Monitor,
   Network,
   ShieldCheck,
   Usb,
-  X,
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +23,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ProductScreenshots } from "@/components/ProductScreenshots";
+import { SiteHeader } from "@/components/SiteHeader";
 import { GuideCards } from "@/components/Guides";
 import { releases, releaseVersion, macPreview } from "@/lib/releases";
 import { trackDownload } from "@/lib/analytics";
@@ -110,8 +109,7 @@ function ReleaseOptions({ location }: { location: "page" | "dialog" }) {
 
 function App() {
   const [downloadOpen, setDownloadOpen] = useState(false);
-  const [info, setInfo] = useState<"privacy" | "release" | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const [info, setInfo] = useState<"privacy" | null>(null);
   const dialogTrigger = useRef<HTMLElement | null>(null);
   const rememberFocus = () => {
     dialogTrigger.current = document.activeElement as HTMLElement;
@@ -123,62 +121,15 @@ function App() {
   const openDownload = (event: MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     rememberFocus();
-    setMobileOpen(false);
     setDownloadOpen(true);
   };
-  const openInfo = (value: "privacy" | "release") => {
+  const openInfo = (value: "privacy") => {
     rememberFocus();
     setInfo(value);
   };
   return (
     <>
-      <a className="skip-link" href="#main">
-        Skip to content
-      </a>
-      <header className="site-header" id="top">
-        <div className="container header-inner">
-          <Logo />
-          <nav aria-label="Main navigation" className="desktop-nav">
-            <a href="#features">Features</a>
-            <a href="#in-action">Screenshots</a>
-            <a href="#questions">FAQ</a>
-            <a href="/guides/">Guides</a>
-          </nav>
-          <div className="header-actions">
-            <Button asChild className="nav-download">
-              <a href="#download" onClick={openDownload}>Get Porty <ArrowDownToLine /></a>
-            </Button>
-            <button
-              className="mobile-toggle"
-              aria-label={mobileOpen ? "Close menu" : "Open menu"}
-              aria-expanded={mobileOpen}
-              aria-controls="mobile-nav"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? <X /> : <Menu />}
-            </button>
-          </div>
-        </div>
-        {mobileOpen && (
-          <nav
-            id="mobile-nav"
-            className="mobile-nav"
-            aria-label="Mobile navigation"
-          >
-            {[
-              ["Features", "#features"],
-              ["Screenshots", "#in-action"],
-              ["FAQ", "#questions"],
-              ["Guides", "/guides/"],
-            ].map(([name, href]) => (
-              <a key={href} href={href} onClick={() => setMobileOpen(false)}>
-                {name}
-                <ArrowUpRight size={18} />
-              </a>
-            ))}
-          </nav>
-        )}
-      </header>
+      <SiteHeader home onDownload={openDownload} />
       <main id="main">
         <section className="hero container">
           <div className="hero-heading">
@@ -384,7 +335,7 @@ function App() {
             <a href="#features">The app</a>
             <a href="/guides/">Guides</a>
             <a href="https://github.com/waltzaround/porty">GitHub</a>
-            <button onClick={() => openInfo("release")}>Release notes</button>
+            <a href="/changelog/">Changelog</a>
             <button onClick={() => openInfo("privacy")}>Privacy</button>
             <a href="#top">
               Back to top <ArrowUpRight size={14} />
@@ -396,9 +347,9 @@ function App() {
           <a className="footer-credit" href="https://walt.online" rel="author">
             Made by Walter Lim
           </a>
-          <button onClick={() => openInfo("release")}>
+          <a href="/changelog/" className="footer-release">
             <span />v{releaseVersion} · In preview
-          </button>
+          </a>
         </div>
       </footer>
       <Dialog open={downloadOpen} onOpenChange={setDownloadOpen}>
@@ -428,18 +379,9 @@ function App() {
       >
         <DialogContent className="info-dialog" onCloseAutoFocus={restoreFocus}>
           <DialogHeader>
-            <DialogTitle>
-              {info === "privacy"
-                ? "Privacy"
-                : `What’s new in Porty ${releaseVersion}`}
-            </DialogTitle>
-            <DialogDescription>
-              {info === "privacy"
-                ? "How Porty handles your data."
-                : "The latest desktop preview."}
-            </DialogDescription>
+            <DialogTitle>Privacy</DialogTitle>
+            <DialogDescription>How Porty handles your data.</DialogDescription>
           </DialogHeader>
-          {info === "privacy" ? (
             <div className="info-copy">
               <p>
                 Porty reads hardware information locally. There are no accounts,
@@ -460,31 +402,6 @@ function App() {
                 host to retrieve it.
               </p>
             </div>
-          ) : (
-            <div className="info-copy">
-              <ul>
-                <li>
-                  Improved USB hub and downstream-device detection on Windows.
-                </li>
-                <li>
-                  Active Windows displays, with resolution and refresh rate.
-                </li>
-                <li>
-                  A refined dark connection map with device icons, zoom,
-                  fit-to-view, and branch focus.
-                </li>
-                <li>
-                  Polished detail drawers and device search that preserves
-                  upstream connections.
-                </li>
-                <li>Smaller Windows packages and tighter release checks.</li>
-              </ul>
-              <p>
-                These are preview builds. Public release signing and broader
-                hardware validation are in progress.
-              </p>
-            </div>
-          )}
         </DialogContent>
       </Dialog>
     </>

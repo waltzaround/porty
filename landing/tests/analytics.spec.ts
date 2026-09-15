@@ -1,4 +1,7 @@
 import { test, expect } from "@playwright/test";
+import { loadEnv } from "vite";
+
+const version = loadEnv("production", process.cwd(), "").VITE_RELEASE_VERSION;
 
 for (const location of ["page", "dialog", "local"] as const) {
   test(`download tracking: ${location}`, async ({ page }) => {
@@ -40,8 +43,8 @@ for (const location of ["page", "dialog", "local"] as const) {
     } else {
       expect(events).toEqual([["event", "download_click", expect.objectContaining({
         send_to: "G-68EK891W8D", download_platform: "windows",
-        release_version: "1.0.3", download_location: location,
-        file_name: "Porty-1.0.3-windows-x64-setup.exe", file_extension: "exe",
+        release_version: version, download_location: location,
+        file_name: `Porty-${version}-windows-x64-setup.exe`, file_extension: "exe",
       })]]);
     }
     expect(errors).toEqual([]);

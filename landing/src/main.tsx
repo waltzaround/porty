@@ -5,6 +5,7 @@ import "./styles.css";
 import "./screenshots.css";
 import Site from "./Site";
 import "./guides.css";
+import "./changelog.css";
 
 const root = document.getElementById("root")!;
 const app = (

@@ -9,7 +9,7 @@ export function generateSite(environment: Record<string, string | undefined>) {
   const site = siteSettings(environment);
   return {
     indexable: site.indexable,
-    pages: ["/", "/guides/", ...guides.map(guidePath)].map((path) => ({
+    pages: ["/", "/changelog/", "/guides/", ...guides.map(guidePath)].map((path) => ({
       path,
       html: renderToString(<StrictMode><Site path={path} /></StrictMode>),
       head: renderMetadata(site, releaseVersion, path),

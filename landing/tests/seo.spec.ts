@@ -65,7 +65,8 @@ test("every guide is a distinct static page with matching canonical and article 
   }
   if (home.includes('content="index, follow,')) {
     const sitemap = await (await request.get("/sitemap.xml")).text();
-    expect(sitemap.match(/<loc>/g)).toHaveLength(5);
+    expect(sitemap.match(/<loc>/g)).toHaveLength(6);
+    expect(sitemap).toContain("/changelog/");
     for (const guide of guides) expect(sitemap).toContain(guidePath(guide));
   }
 });

@@ -937,13 +937,13 @@ h1 > span:not(.headline-port) {
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.footer-bottom button {
+.footer-bottom .footer-release {
   display: flex;
   align-items: center;
   gap: 6px;
   color: #746c7a;
 }
-.footer-bottom button > span {
+.footer-bottom .footer-release > span {
   width: 4px;
   height: 4px;
   border-radius: 50%;

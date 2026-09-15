@@ -118,8 +118,9 @@ for (const width of [390, 768, 1440]) {
       await page.getByRole("button", { name: "Open menu" }).click();
       await page
         .getByRole("navigation", { name: "Mobile navigation" })
-        .getByRole("link", { name: "Screenshots", exact: true })
+        .getByRole("link", { name: "FAQ", exact: true })
         .click();
+      await expect(page).toHaveURL(/#questions$/);
       await expect(
         page.getByRole("navigation", { name: "Mobile navigation" }),
       ).not.toBeVisible();

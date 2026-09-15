@@ -1,4 +1,5 @@
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SiteHeader } from "./SiteHeader";
 import { guidePath, guides, type Guide } from "@/lib/guides";
 
 export function GuideCards({ exclude }: { exclude?: string }) {
@@ -16,30 +17,12 @@ export function GuideCards({ exclude }: { exclude?: string }) {
   );
 }
 
-function GuideHeader() {
-  return (
-    <>
-      <a className="skip-link" href="#main">Skip to content</a>
-      <header className="site-header">
-        <div className="container header-inner">
-          <a className="brand" href="/" aria-label="Porty home">
-            <img src="/porty.svg" alt="" width="34" height="34" />
-            <span>porty<span className="brand-period">.</span></span>
-          </a>
-          <nav className="guide-nav" aria-label="Main navigation">
-            <a href="/guides/">Guides</a>
-            <a href="/#download" className="guide-download">Get Porty <ArrowUpRight size={15} aria-hidden="true" /></a>
-          </nav>
-        </div>
-      </header>
-    </>
-  );
-}
-
-function GuideFooter() {
+export function GuideFooter() {
   return (
     <footer className="container guide-footer">
       <a href="/">Porty for macOS & Windows</a>
+      <a href="/changelog/">Changelog</a>
+      <a href="/guides/">Guides</a>
       <a href="https://github.com/waltzaround/porty">GitHub</a>
       <a href="https://walt.online" rel="author">Made by Walter Lim</a>
       <a href="/#privacy">Privacy</a>
@@ -50,7 +33,7 @@ function GuideFooter() {
 export function GuideIndex() {
   return (
     <>
-      <GuideHeader />
+      <SiteHeader />
       <main className="container guide-index" id="main">
         <p className="eyebrow">Practical hardware guides</p>
         <h1>Make sense of your hardware connections.</h1>
@@ -66,7 +49,7 @@ export function GuideIndex() {
 export function GuidePage({ guide }: { guide: Guide }) {
   return (
     <>
-      <GuideHeader />
+      <SiteHeader />
       <main id="main" className="container guide-main">
         <nav className="guide-breadcrumbs" aria-label="Breadcrumb">
           <a href="/">Porty</a><span aria-hidden="true">/</span><a href="/guides/">Guides</a>

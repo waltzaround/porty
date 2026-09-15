@@ -1,6 +1,7 @@
 import { product, questions } from "./product";
 import { guideForPath, guidePath, guides } from "./guides";
 import { heroSizes, heroSrcSet } from "../components/HeroImage";
+import { changelog, releaseNotesUrl } from "./changelog";
 
 export type SiteSettings = { url?: string; indexable: boolean };
 type Release = { name: string; detail: string; url?: string };
@@ -37,6 +38,10 @@ function escapeHtml(value: string): string {
 }
 
 function pageDetails(path: string) {
+  if (path === "/changelog/") return {
+    title: "Changelog — Porty",
+    description: "The latest Porty releases, improvements, and fixes for macOS and Windows. Read what changed and find release downloads.",
+  };
   const guide = guideForPath(path);
   if (guide) return { title: `${guide.title} — Porty`, description: guide.description, guide };
   if (path === "/guides/") return {
@@ -67,7 +72,7 @@ export function structuredData(site: SiteSettings, version: string, path = "/") 
         description: page.description,
         inLanguage: "en",
         isPartOf: site.url ? { "@id": absolute("#website") } : undefined,
-        mainEntity: site.url ? { "@id": absolute(page.guide ? `${path}#article` : path === "/" ? "#app" : `${path}#guides`) } : undefined,
+        mainEntity: site.url ? { "@id": absolute(page.guide ? `${path}#article` : path === "/" ? "#app" : path === "/changelog/" ? `${path}#releases` : `${path}#guides`) } : undefined,
       },
       ...(path === "/" ? [{
         "@type": "SoftwareApplication",
@@ -78,10 +83,17 @@ export function structuredData(site: SiteSettings, version: string, path = "/") 
         applicationCategory: "UtilitiesApplication",
         operatingSystem: ["macOS", "Windows"],
         softwareVersion: version,
-        releaseNotes: "Preview release; public signing and broader hardware validation are in progress.",
+        releaseNotes: absolute("/changelog/"),
         featureList: product.features,
         image: absolute("porty.svg"),
         screenshot: site.url ? ["mac-ports", "mac-hero", "details"].map((name) => absolute(`screenshots/${name}.png`)) : undefined,
+      }] : path === "/changelog/" ? [{
+        "@type": "ItemList",
+        "@id": absolute(`${path}#releases`),
+        itemListElement: changelog.map((release, index) => ({
+          "@type": "ListItem", position: index + 1,
+          name: `Porty ${release.version} — ${release.title}`, url: releaseNotesUrl(release.version),
+        })),
       }] : page.guide ? [{
         "@type": "Article",
         "@id": absolute(`${path}#article`),
@@ -161,6 +173,7 @@ export function crawlFiles(site: SiteSettings, version: string, releases: Releas
       "",
       "## Website",
       `- [Porty](${location("")}): Hardware connection explorer for Mac and Windows.`,
+      `- [Changelog](${location("/changelog/")}): Release history, improvements, and fixes.`,
       `- [Features](${location("#features")}): Connection map and device details.`,
       `- [Questions](${location("#questions")}): Compatibility, hardware limits, and privacy.`,
       `- [Downloads](${location("#download")}): macOS Apple Silicon, macOS Intel, and Windows 64-bit builds.`,
@@ -179,7 +192,7 @@ export function crawlFiles(site: SiteSettings, version: string, releases: Releas
     ].join("\n"),
   };
   if (site.indexable) {
-    const urls = ["/", "/guides/", ...guides.map(guidePath)];
+    const urls = ["/", "/changelog/", "/guides/", ...guides.map(guidePath)];
     files["sitemap.xml"] = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((path) => `<url><loc>${escapeHtml(new URL(path, site.url).href)}</loc></url>`).join("")}</urlset>\n`;
   }
   return files;
