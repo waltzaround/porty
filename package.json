@@ -1,6 +1,6 @@
 {
   "name": "porty",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Know your connections. A physical port and capability explorer for macOS and Windows.",
   "author": "Porty",
   "private": true,
@@ -60,6 +60,7 @@
     ],
     "asar": true,
     "electronFuses": {
+      "resetAdHocDarwinSignature": true,
       "runAsNode": false,
       "enableNodeOptionsEnvironmentVariable": false,
       "enableNodeCliInspectArguments": false,

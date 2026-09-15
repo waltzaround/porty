@@ -1,10 +1,17 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import { readFile, readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import asar from "@electron/asar";
 import { getCurrentFuseWire, FuseV1Options } from "@electron/fuses";
 import { packagePaths } from "./package-paths.mjs";
 const { executable, resources } = packagePaths();
+// Fuse changes modify Electron's executable pages. Apple Silicon refuses to
+// launch them unless the final bundle has been signed again after packaging.
+if (process.platform === "darwin") {
+  const app = path.resolve(resources, "../..");
+  execFileSync("codesign", ["--verify", "--deep", "--strict", "--verbose=2", app], { stdio: "inherit" });
+}
 const archive = path.join(resources, "app.asar");
 const files = asar.listPackage(archive).map(file => file.replaceAll("\\", "/").replace(/^\//, ""));
 assert.ok(!files.some(file => file.endsWith(".map")), "Source maps must not ship");

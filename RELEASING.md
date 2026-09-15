@@ -30,6 +30,8 @@ Apple Silicon and Intel jobs build the exact tagged source on `macos-15` (arm64)
 
 The app is not Developer ID signed or notarized in this preview workflow. Downloads and release notes state this explicitly. macOS 12 or later is required. Mac signing/notarization remains a separate release step requiring Apple credentials.
 
+Starting with 1.0.4, the build renews the ad-hoc macOS signature after applying Electron security fuses. Changing those executable bytes without renewing the signature makes Apple Silicon terminate the app at startup with `CODESIGNING: Invalid Page`. Keep `electronFuses.resetAdHocDarwinSignature` enabled. `verify:package` validates the final Mac bundle and all nested code with `codesign --verify --deep --strict` before release. An ad-hoc signature ensures executable integrity but does not provide Developer ID signing or notarization.
+
 Uploads are never clobbered. Identical assets can be reused, but conflicting hashes stop publication. If uploading fails partway through, rerun the failed publish job so it uses the original build artifacts, rather than rebuilding that version. The website uses the architecture-specific DMG URLs; ZIP files remain available on the GitHub release page. Publishing a GitHub release does not automatically deploy the website: update its release settings, verify the downloads, and run `npm run deploy` from `landing/`.
 
 ### Signed builds
