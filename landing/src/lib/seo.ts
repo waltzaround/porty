@@ -75,7 +75,7 @@ export function structuredData(site: SiteSettings, version: string) {
 }
 
 export function renderMetadata(site: SiteSettings, version: string): string {
-  const image = site.url ? new URL("screenshots/branch.png", site.url).href : undefined;
+  const image = site.url ? new URL("screenshots/mac-hero.png", site.url).href : undefined;
   const meta = (key: string, value: string, property = false) =>
     `<meta ${property ? "property" : "name"}="${key}" content="${escapeHtml(value)}" />`;
   return [
@@ -99,9 +99,9 @@ export function renderMetadata(site: SiteSettings, version: string): string {
       meta("og:image:type", "image/png", true),
       meta("og:image:width", "1440", true),
       meta("og:image:height", "900", true),
-      meta("og:image:alt", "Porty’s Windows app showing USB devices connected through a hub.", true),
+      meta("og:image:alt", "Generated Porty hero based on a live MacBook Pro screenshot, showing USB hubs, a Dell monitor, and an Ethernet adapter.", true),
       meta("twitter:image", image),
-      meta("twitter:image:alt", "Porty’s Windows app showing USB devices connected through a hub."),
+      meta("twitter:image:alt", "Generated Porty hero based on a live MacBook Pro screenshot, showing USB hubs, a Dell monitor, and an Ethernet adapter."),
     ] : []),
     `<link rel="alternate" type="text/markdown" href="/llms.txt" title="Porty product information" />`,
     `<script type="application/ld+json">${JSON.stringify(structuredData(site, version)).replace(/</g, "\\u003c")}</script>`,

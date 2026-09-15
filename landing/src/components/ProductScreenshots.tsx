@@ -14,8 +14,8 @@ const screenshots = [
     id: "map",
     label: "Connection map",
     icon: Network,
-    src: "/screenshots/branch.png",
-    alt: "Porty on Windows in dark mode, showing a focused USB hub branch with the A50 X, two downstream hubs, and C922 Pro Stream Webcam.",
+    src: "/screenshots/mac-hero.png",
+    alt: "Generated hero based on Porty running on a MacBook Pro, showing its Dell monitor, USB hub branches, Ethernet adapter, and power connection.",
   },
   {
     id: "ports",
@@ -42,7 +42,7 @@ export function ProductScreenshots() {
     <section
       id="in-action"
       className="product-section container screenshot-showcase"
-      aria-label="Actual Porty screenshots"
+      aria-label="Porty product views"
     >
       <Tabs value={active} onValueChange={setActive}>
         <div className="screenshots-topline">
@@ -57,7 +57,7 @@ export function ProductScreenshots() {
               </TabsTrigger>
             ))}
           </TabsList>
-          <span className="screenshot-platform">Windows · Dark appearance</span>
+          <span className="screenshot-platform">{active === "map" ? "macOS" : "Windows"} · Dark appearance</span>
         </div>
         <div className="screenshot-stage">
           <div className="screenshot-stage-grid" aria-hidden="true" />
@@ -101,7 +101,7 @@ export function ProductScreenshots() {
           <DialogHeader>
             <DialogTitle>{current.label}</DialogTitle>
             <DialogDescription>
-              Windows app screenshot. Scroll to view the full image.
+              {active === "map" ? "Generated from a live Mac app screenshot." : "Windows app screenshot."} Scroll to view the full image.
             </DialogDescription>
           </DialogHeader>
           <div className="screenshot-lightbox-scroll">

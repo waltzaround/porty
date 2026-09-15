@@ -35,7 +35,7 @@ npm test
 The build generates:
 
 - Full page HTML, including all FAQ answers and download options. The FAQ and download section work without JavaScript.
-- A descriptive title and summary, canonical URL, Open Graph and Twitter metadata using an actual app screenshot.
+- A descriptive title and summary, canonical URL, Open Graph and Twitter metadata using the generated Mac hero image.
 - `WebSite`, `WebPage`, and `SoftwareApplication` JSON-LD with supported platforms, features, version, and screenshots. There are no invented offers, ratings, or reviews.
 - `robots.txt` and a production-only `sitemap.xml` containing the canonical homepage. Section anchors are not separate pages.
 - `/llms.txt`, a readable product summary generated from the same facts and FAQ used on the page. This is an optional convenience for tools that read it, not a ranking mechanism. Google explicitly says it does not use this file for Search or its generative AI features.
@@ -61,7 +61,7 @@ Copy `.env.example` to `.env.local`, add the three public HTTPS artifact URLs, a
 
 ## Design and interaction
 
-The page uses Porty’s existing mark, warm ivory surfaces, violet accents, and DM Sans. Its product gallery shows real screenshots of the built Windows app running against live hardware, presented in CSS frames with a keyboard-accessible lightbox. It offers connection-map, port-explorer, and detail-drawer views. The feature cards also use actual app captures, not illustrative UI.
+The page uses Porty’s existing mark, warm ivory surfaces, violet accents, and DM Sans. Its product gallery leads with an image-generated dark treatment of a live MacBook Pro connection-map capture (`mac-hero.png`), followed by real Windows app screenshots, presented in CSS frames with a keyboard-accessible lightbox. It offers connection-map, port-explorer, and detail-drawer views. The feature cards also use actual app captures, not illustrative UI.
 
 To refresh the images on the Windows development machine, run `npm run build` followed by `npm run capture:product` from the repository root. This launches a separate Electron instance, selects dark appearance, scans real hardware, and uses normal UI controls to focus a hub branch and open its drawer. Full screenshots and element captures are copied to `landing/public/screenshots`; private capture metadata stays in `.artifacts/product-captures`. The current script selects the local USB2.0 Hub branch. Adapt that selection for another machine. No hardware values or text are rewritten for the screenshots.
 
