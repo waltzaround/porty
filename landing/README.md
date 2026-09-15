@@ -35,12 +35,22 @@ npm test
 The build generates:
 
 - Full page HTML, including all FAQ answers and download options. The FAQ and download section work without JavaScript.
-- A descriptive title and summary, canonical URL, Open Graph and Twitter metadata using the generated Mac hero image.
+- A descriptive title and summary, canonical URL, Open Graph and Twitter metadata for the homepage, guide index, and each guide.
 - `WebSite`, `WebPage`, and `SoftwareApplication` JSON-LD with supported platforms, features, version, and screenshots. There are no invented offers, ratings, or reviews.
-- `robots.txt` and a production-only `sitemap.xml` containing the canonical homepage. Section anchors are not separate pages.
+- `robots.txt` and a production-only `sitemap.xml` containing five canonical pages: the homepage, `/guides/`, and three troubleshooting guides. Section anchors are not separate pages.
+- Static guide articles, sources, screenshots, related links, and per-page `Article` and breadcrumb structured data. Guides remain readable and navigable without JavaScript.
+- A real `404.html`; Cloudflare uses `404-page` handling for unknown URLs.
 - `/llms.txt`, a readable product summary generated from the same facts and FAQ used on the page. This is an optional convenience for tools that read it, not a ranking mechanism. Google explicitly says it does not use this file for Search or its generative AI features.
 
 Product facts live in `src/lib/product.ts`; release version and links live in `src/lib/releases.ts`. Keep these and the preview status current when releasing. The HTML and text summary are the same for people and crawlers; there is no user-agent-specific content.
+
+### Maintaining the guides and images
+
+Guide content lives in `src/lib/guides.ts`. The static build and browser entry use the same route list and content. Adding an article there adds it to the guide index, homepage cards, related guides, sitemap, and product summary. Use original explanations, primary sources, and clearly labelled actual hardware captures. Check each new guide in the production preview, including direct navigation without JavaScript.
+
+Before building, `scripts/optimize-images.mjs` generates 640, 960, and 1440-pixel AVIF and WebP hero variants from the original PNG. `HeroImage` uses a responsive picture with an AVIF preload, with WebP fallback. The original PNG remains available for social metadata. If you change compression settings, regenerate the variants; changed source images are detected by modification time. The browser test checks that mobile loads only one modern hero variant and does not fetch the original PNG.
+
+Search Console is the source of truth for indexing and query impressions. A successfully submitted sitemap is a discovery signal, not confirmation that each URL has been indexed. Analytics already records `download_click` for actual installer-link clicks; this measures download intent rather than completed installs. Compare Search Console query/page data and organic download clicks as traffic accumulates.
 
 ### When the domain is live
 
