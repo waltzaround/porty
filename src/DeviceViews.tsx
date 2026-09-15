@@ -58,7 +58,7 @@ export function DeviceViews({ ports, devices }: { ports: Port[]; devices: Invent
           <div><dt>Current link</dt><dd>{selected.device.linkSpeed || 'Not reported'}</dd></div>
           {selected.device.portMapping && <div><dt>Port mapping</dt><dd>{selected.device.portMapping}</dd></div>}
         </dl>}
-        {selected.device?.hubPorts && <><h4>Reported hub ports</h4><dl>{selected.device.hubPorts.map((p, i) => <div key={i}><dt>Port {p.number || i + 1} · {p.connector}</dt><dd>{p.devices.join(', ') || 'No data device'}<small>{p.status}</small></dd></div>)}</dl></>}
+        {selected.device?.hubPorts && <><h4>Reported hub paths</h4><dl>{selected.device.hubPorts.map((p, i) => <div key={i}><dt>{p.internal ? 'Internal link' : 'Port'} {p.number || i + 1} · {p.connector}</dt><dd>{p.devices.join(', ') || 'No data device'}<small>{p.internal ? 'Fixed internal connection' : p.status}</small></dd></div>)}</dl></>}
         {selected.port && <p>{selected.port.location} · {selected.port.status}</p>}
       </>}
     </section>}

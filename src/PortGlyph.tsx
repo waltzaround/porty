@@ -70,6 +70,24 @@ export function PortGlyph({
               strokeDasharray="2 2"
             />
           </>
+        ) : type === "Display (unclassified)" ? (
+          <>
+            <rect
+              x="10"
+              y="6"
+              width="44"
+              height="27"
+              rx="3"
+              stroke="currentColor"
+              strokeWidth="2.5"
+            />
+            <path
+              d="M32 33v6m-9 0h18"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+          </>
         ) : type === "SD card" ? (
           <>
             <rect

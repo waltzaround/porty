@@ -63,6 +63,15 @@ const connectorLabel = (type: Connector) =>
       ? "Other USB"
       : type;
 
+function DeviceHeader({ name, detail, kind, summary }: { name: string; detail: string; kind: "computer" | "display" | "device"; summary?: string }) {
+  const Icon = kind === "computer" ? Laptop : kind === "display" ? Monitor : Plug;
+  return <header className="machine-summary" aria-label={`${name} summary`}>
+    <Icon size={34} strokeWidth={1.25} aria-hidden="true" />
+    <div><h2>{name}</h2><p>{detail}</p></div>
+    {summary && <span>{summary}</span>}
+  </header>;
+}
+
 function EvidenceIcon({ evidence }: { evidence: Evidence }) {
   const Icon =
     evidence === "detected"
@@ -96,7 +105,7 @@ function HubPorts({ device }: { device: ConnectedDevice }) {
       {device.hubPorts?.length ? (
         device.hubPorts.map((port, i) => (
           <div key={i} className="hub-port-row">
-            <span>Port {port.number || i + 1}</span>
+            <span>{port.internal ? "Internal link" : "Port"} {port.number || i + 1}</span>
             <span>
               {port.connector === "USB (unclassified)"
                 ? "Connector not reported"
@@ -120,6 +129,7 @@ function CurrentCell({ metric, className = "" }: { metric: CurrentValue; classNa
 }
 function PortRow({ port, onSelect }: { port: Port; onSelect: () => void }) {
   const stats = portStats(port);
+  const monitor = port.devices.find(d => d.kind === "display" && d.portMapping);
   return (
     <button
       className={`port-row port-columns stats-columns-${stats.length}`}
@@ -131,9 +141,9 @@ function PortRow({ port, onSelect }: { port: Port; onSelect: () => void }) {
         <span>
           <strong>{port.name}</strong>
           <small>
-            {port.devices[0]?.name ??
+            {monitor?.name ?? port.devices[0]?.name ??
               (port.connection?.active ? port.connector === "SD card" ? "Card inserted" : "Cable connected" : port.protocol)}
-            {port.devices.length > 1 ? ` +${port.devices.length - 1}` : ""}
+            {!monitor && port.devices.length > 1 ? ` +${port.devices.length - 1}` : ""}
           </small>
         </span>
       </span>
@@ -906,26 +916,11 @@ export default function App() {
           ) : (
             scan && (
               <>
-                <section
-                  className="machine-summary"
-                  aria-label="Computer summary"
-                >
-                  <Laptop size={34} strokeWidth={1.25} />
-                  <div>
-                    <h2>{scan.machine.name}</h2>
-                    <p>
-                      {scan.machine.chip || scan.machine.model} ·{" "}
-                      {scan.machine.os}
-                    </p>
-                  </div>
-                  <span>
-                    {ports.length} ports
-                    <span className="summary-separator">·</span>
-                    {devices.length} devices
-                  </span>
-                </section>
                 {view === "devices" ? (
-                  <DeviceViews ports={hostPorts} devices={devices} />
+                  <>
+                    <DeviceHeader name={scan.machine.name} detail={`${scan.machine.chip || scan.machine.model} · ${scan.machine.os}`} kind="computer" summary={`${ports.length} ports · ${devices.length} devices`} />
+                    <DeviceViews ports={hostPorts} devices={devices} />
+                  </>
                 ) : (
                   <>
                     <div className="filter-bar">
@@ -959,7 +954,11 @@ export default function App() {
                       const visible = owner.ports.filter(p => filtered.includes(p));
                       if (!visible.length && (owner.ports.length || connector !== "all" || status !== "all" || query)) return null;
                       return <section className="device-port-group" key={owner.id} aria-label={`${owner.name} ports`}>
-                        <header><h2>{owner.name}</h2><p>{owner.detail}</p></header>
+                        <DeviceHeader
+                          name={owner.name}
+                          detail={owner.id === "host" ? `${scan.machine.chip || scan.machine.model} · ${scan.machine.os}` : owner.detail}
+                          kind={owner.id === "host" ? "computer" : owner.ports.some(p => p.devices.some(d => d.kind === "display")) ? "display" : "device"}
+                        />
                         {CONNECTORS.map((type) => {
                         const group = visible.filter(
                           (p) => p.connector === type,

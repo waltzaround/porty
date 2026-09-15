@@ -1,0 +1,349 @@
+[
+  {
+    "IOObjectClass": "AppleUSB20XHCIARMPort",
+    "IORegistryEntryName": "usb-drd1-port-hs",
+    "IORegistryEntryID": 100,
+    "locationID": 17825792,
+    "UsbCPortNumber": 2,
+    "PortNumber": 2,
+    "usb-port-number": 1,
+    "usb-port-type": 4,
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOUSBHostDevice",
+        "IORegistryEntryName": "IOUSBHostDevice",
+        "IORegistryEntryID": 101,
+        "idVendor": 1105,
+        "idProduct": 33858,
+        "bDeviceClass": 9,
+        "locationID": 17825792,
+        "Device Speed": 2,
+        "kUSBContainerID": "fixture-container-1",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "AppleUSB20Hub",
+            "IORegistryEntryName": "AppleUSB20Hub",
+            "IORegistryEntryID": 102,
+            "bDeviceClass": 9,
+            "locationID": 17825792,
+            "IORegistryEntryChildren": [
+              {
+                "IOObjectClass": "AppleUSB20HubPort",
+                "IORegistryEntryName": "AppleUSB20HubPort",
+                "IORegistryEntryID": 103,
+                "locationID": 18022400,
+                "usb-port-number": 3,
+                "usb-port-type": 1,
+                "IORegistryEntryChildren": [
+                  {
+                    "IOObjectClass": "IOUSBHostDevice",
+                    "IORegistryEntryName": "3-Port USB 2.1 Hub",
+                    "IORegistryEntryID": 104,
+                    "USB Product Name": "3-Port USB 2.1 Hub",
+                    "USB Vendor Name": "Generic",
+                    "idVendor": 3034,
+                    "idProduct": 21521,
+                    "bDeviceClass": 9,
+                    "locationID": 18022400,
+                    "Device Speed": 2,
+                    "kUSBContainerID": "fixture-container-2",
+                    "IORegistryEntryChildren": [
+                      {
+                        "IOObjectClass": "AppleUSB20Hub",
+                        "IORegistryEntryName": "AppleUSB20Hub",
+                        "IORegistryEntryID": 105,
+                        "bDeviceClass": 9,
+                        "locationID": 18022400,
+                        "IORegistryEntryChildren": [
+                          {
+                            "IOObjectClass": "AppleUSB20HubPort",
+                            "IORegistryEntryName": "AppleUSB20HubPort",
+                            "IORegistryEntryID": 106,
+                            "locationID": 18026496,
+                            "usb-port-number": 1,
+                            "usb-port-type": 1
+                          },
+                          {
+                            "IOObjectClass": "AppleUSB20HubPort",
+                            "IORegistryEntryName": "AppleUSB20HubPort",
+                            "IORegistryEntryID": 107,
+                            "locationID": 18030592,
+                            "usb-port-number": 2,
+                            "usb-port-type": 0
+                          },
+                          {
+                            "IOObjectClass": "AppleUSB20HubPort",
+                            "IORegistryEntryName": "AppleUSB20HubPort",
+                            "IORegistryEntryID": 108,
+                            "locationID": 18034688,
+                            "usb-port-number": 3,
+                            "usb-port-type": 0
+                          }
+                        ]
+                      },
+                      {
+                        "IOObjectClass": "IOUSBHostInterface",
+                        "IORegistryEntryName": "IOUSBHostInterface",
+                        "IORegistryEntryID": 109,
+                        "USB Product Name": "3-Port USB 2.1 Hub",
+                        "USB Vendor Name": "Generic",
+                        "idVendor": 3034,
+                        "idProduct": 21521,
+                        "bInterfaceClass": 9,
+                        "locationID": 18022400
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "IOObjectClass": "AppleUSB20HubPort",
+                "IORegistryEntryName": "AppleUSB20HubPort",
+                "IORegistryEntryID": 110,
+                "locationID": 18087936,
+                "usb-port-number": 4,
+                "usb-port-type": 1,
+                "IORegistryEntryChildren": [
+                  {
+                    "IOObjectClass": "IOUSBHostDevice",
+                    "IORegistryEntryName": "IOUSBHostDevice",
+                    "IORegistryEntryID": 111,
+                    "idVendor": 1105,
+                    "idProduct": 33535,
+                    "bDeviceClass": 0,
+                    "locationID": 18087936,
+                    "Device Speed": 2,
+                    "kUSBContainerID": "fixture-container-1",
+                    "IORegistryEntryChildren": [
+                      {
+                        "IOObjectClass": "AppleUSBHostCompositeDevice",
+                        "IORegistryEntryName": "AppleUSBHostCompositeDevice",
+                        "IORegistryEntryID": 112,
+                        "bDeviceClass": 0
+                      },
+                      {
+                        "IOObjectClass": "IOUSBHostInterface",
+                        "IORegistryEntryName": "IOUSBHostInterface",
+                        "IORegistryEntryID": 113,
+                        "idVendor": 1105,
+                        "idProduct": 33535,
+                        "bInterfaceClass": 3,
+                        "locationID": 18087936
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "IOObjectClass": "AppleUSB20HubPort",
+                "IORegistryEntryName": "AppleUSB20HubPort",
+                "IORegistryEntryID": 114,
+                "locationID": 18153472,
+                "usb-port-number": 5,
+                "usb-port-type": 1
+              },
+              {
+                "IOObjectClass": "AppleUSB20HubPort",
+                "IORegistryEntryName": "AppleUSB20HubPort",
+                "IORegistryEntryID": 115,
+                "locationID": 17891328,
+                "usb-port-number": 1,
+                "usb-port-type": 0
+              },
+              {
+                "IOObjectClass": "AppleUSB20HubPort",
+                "IORegistryEntryName": "AppleUSB20HubPort",
+                "IORegistryEntryID": 116,
+                "locationID": 17956864,
+                "usb-port-number": 2,
+                "usb-port-type": 0
+              }
+            ]
+          },
+          {
+            "IOObjectClass": "IOUSBHostInterface",
+            "IORegistryEntryName": "IOUSBHostInterface",
+            "IORegistryEntryID": 117,
+            "idVendor": 1105,
+            "idProduct": 33858,
+            "bInterfaceClass": 9,
+            "locationID": 17825792
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "IOObjectClass": "AppleUSB30XHCIARMPort",
+    "IORegistryEntryName": "usb-drd1-port-ss",
+    "IORegistryEntryID": 118,
+    "locationID": 18874368,
+    "UsbCPortNumber": 2,
+    "PortNumber": 2,
+    "usb-port-number": 2,
+    "usb-port-type": 4,
+    "IORegistryEntryChildren": [
+      {
+        "IOObjectClass": "IOUSBHostDevice",
+        "IORegistryEntryName": "IOUSBHostDevice",
+        "IORegistryEntryID": 119,
+        "idVendor": 1105,
+        "idProduct": 33856,
+        "bDeviceClass": 9,
+        "locationID": 18874368,
+        "Device Speed": 3,
+        "kUSBContainerID": "fixture-container-1",
+        "IORegistryEntryChildren": [
+          {
+            "IOObjectClass": "AppleUSB30Hub",
+            "IORegistryEntryName": "AppleUSB30Hub",
+            "IORegistryEntryID": 120,
+            "bDeviceClass": 9,
+            "locationID": 18874368,
+            "IORegistryEntryChildren": [
+              {
+                "IOObjectClass": "AppleUSB30HubPort",
+                "IORegistryEntryName": "AppleUSB30HubPort",
+                "IORegistryEntryID": 121,
+                "locationID": 19070976,
+                "usb-port-number": 3,
+                "usb-port-type": 1,
+                "IORegistryEntryChildren": [
+                  {
+                    "IOObjectClass": "IOUSBHostDevice",
+                    "IORegistryEntryName": "3-Port USB 3.1 Hub",
+                    "IORegistryEntryID": 122,
+                    "USB Product Name": "3-Port USB 3.1 Hub",
+                    "USB Vendor Name": "Generic",
+                    "idVendor": 3034,
+                    "idProduct": 1041,
+                    "bDeviceClass": 9,
+                    "locationID": 19070976,
+                    "Device Speed": 3,
+                    "kUSBContainerID": "fixture-container-2",
+                    "IORegistryEntryChildren": [
+                      {
+                        "IOObjectClass": "AppleUSB30Hub",
+                        "IORegistryEntryName": "AppleUSB30Hub",
+                        "IORegistryEntryID": 123,
+                        "bDeviceClass": 9,
+                        "locationID": 19070976,
+                        "IORegistryEntryChildren": [
+                          {
+                            "IOObjectClass": "AppleUSB30HubPort",
+                            "IORegistryEntryName": "AppleUSB30HubPort",
+                            "IORegistryEntryID": 124,
+                            "locationID": 19075072,
+                            "usb-port-number": 1,
+                            "usb-port-type": 1,
+                            "IORegistryEntryChildren": [
+                              {
+                                "IOObjectClass": "IOUSBHostDevice",
+                                "IORegistryEntryName": "USB 10/100/1000 LAN",
+                                "IORegistryEntryID": 125,
+                                "USB Product Name": "USB 10_100_1000 LAN",
+                                "USB Vendor Name": "Realtek",
+                                "idVendor": 3034,
+                                "idProduct": 33107,
+                                "bDeviceClass": 0,
+                                "locationID": 19075072,
+                                "Device Speed": 3,
+                                "kUSBContainerID": "fixture-container-1",
+                                "IORegistryEntryChildren": [
+                                  {
+                                    "IOObjectClass": "AppleUSBCDCCompositeDevice",
+                                    "IORegistryEntryName": "AppleUSBCDCCompositeDevice",
+                                    "IORegistryEntryID": 126,
+                                    "bDeviceClass": 0
+                                  },
+                                  {
+                                    "IOObjectClass": "IOUSBHostInterface",
+                                    "IORegistryEntryName": "CDC Communications Control",
+                                    "IORegistryEntryID": 127,
+                                    "USB Product Name": "USB 10/100/1000 LAN",
+                                    "USB Vendor Name": "Realtek",
+                                    "idVendor": 3034,
+                                    "idProduct": 33107,
+                                    "bInterfaceClass": 2,
+                                    "locationID": 19075072
+                                  },
+                                  {
+                                    "IOObjectClass": "IOUSBHostInterface",
+                                    "IORegistryEntryName": "IOUSBHostInterface",
+                                    "IORegistryEntryID": 128,
+                                    "USB Product Name": "USB 10/100/1000 LAN",
+                                    "USB Vendor Name": "Realtek",
+                                    "idVendor": 3034,
+                                    "idProduct": 33107,
+                                    "bInterfaceClass": 10,
+                                    "locationID": 19075072
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "IOObjectClass": "AppleUSB30HubPort",
+                            "IORegistryEntryName": "AppleUSB30HubPort",
+                            "IORegistryEntryID": 129,
+                            "locationID": 19079168,
+                            "usb-port-number": 2,
+                            "usb-port-type": 0
+                          },
+                          {
+                            "IOObjectClass": "AppleUSB30HubPort",
+                            "IORegistryEntryName": "AppleUSB30HubPort",
+                            "IORegistryEntryID": 130,
+                            "locationID": 19083264,
+                            "usb-port-number": 3,
+                            "usb-port-type": 0
+                          }
+                        ]
+                      },
+                      {
+                        "IOObjectClass": "IOUSBHostInterface",
+                        "IORegistryEntryName": "Interrupt In Interface",
+                        "IORegistryEntryID": 131,
+                        "USB Product Name": "3-Port USB 3.1 Hub",
+                        "USB Vendor Name": "Generic",
+                        "idVendor": 3034,
+                        "idProduct": 1041,
+                        "bInterfaceClass": 9,
+                        "locationID": 19070976
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "IOObjectClass": "AppleUSB30HubPort",
+                "IORegistryEntryName": "AppleUSB30HubPort",
+                "IORegistryEntryID": 132,
+                "locationID": 18939904,
+                "usb-port-number": 1,
+                "usb-port-type": 0
+              },
+              {
+                "IOObjectClass": "AppleUSB30HubPort",
+                "IORegistryEntryName": "AppleUSB30HubPort",
+                "IORegistryEntryID": 133,
+                "locationID": 19005440,
+                "usb-port-number": 2,
+                "usb-port-type": 0
+              }
+            ]
+          },
+          {
+            "IOObjectClass": "IOUSBHostInterface",
+            "IORegistryEntryName": "IOUSBHostInterface",
+            "IORegistryEntryID": 134,
+            "idVendor": 1105,
+            "idProduct": 33856,
+            "bInterfaceClass": 9,
+            "locationID": 18874368
+          }
+        ]
+      }
+    ]
+  }
+]

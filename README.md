@@ -32,7 +32,8 @@ npm test            # Hardware parser and evidence-handling regression tests
 - Every capability identifies its evidence: OS detection, a manufacturer specification, or unreported information.
 - Connected device inventory, connector/status filters, capability search, keyboard search shortcut, manual refresh, and 15-second polling enabled by default in the desktop app.
 - macOS physical connection records detect charging-only cables and named power adapters. Selected USB-PD input limits are separated from actual power draw and cable ratings. Hub details retain downstream port records and parent device names.
-- Scan results omit machine serial numbers, platform UUIDs, USB instance IDs, and full hub paths. JSON output remains available through `npm run scan`.
+- Scan results omit machine serial numbers, platform UUIDs, USB instance IDs and raw USB container IDs. USB grouping uses scan-local container tokens and numeric port routes. JSON output remains available through `npm run scan`.
+- macOS dock groups combine uniquely matched USB 2/3 companion hubs using container identity and upstream route. Captive/internal links remain inspectable but do not count as external sockets. A uniquely mapped USB-C monitor names the shared connection group; this does not assert that every downstream device is inside the monitor. USB interfaces and drivers are not counted as separate devices. Missing identities and ambiguous displays remain separate.
 - Local processing; no telemetry, remote fonts, backend service, or network dependency for scanning. Source links open in the default browser when clicked.
 
 ## What can actually be detected
@@ -67,7 +68,11 @@ Build each platform on its native OS. Development builds are unsigned; configure
 
 ## Validation
 
-Tested locally on an Apple M4 Max MacBook Pro: real scan, packaged Electron launch, connector grouping, capability inspection, search, and status filters. The live scan identified seven physical ports, including three USB-C / Thunderbolt 5 ports. The 61 tests cover companion deduplication, unknown models, missing registry data, internal-port exclusion, unknown speed/power handling, firmware ports, report privacy, paired display modes, chip-specific display budgets, unknown display limits, a sanitized live charger fixture, stale identity removal, downstream hub ports, current values, ambiguous monitor mapping, measured power validation, card formats, unplugged card state, headphone routing and connector-specific stats. Windows native hardware behavior requires a Windows machine; the included Windows CI step compiles the helper but cannot substitute for hardware tests.
+Tested locally on an Apple M4 Max MacBook Pro: real scan, packaged Electron launch, connector grouping, capability inspection, search, and status filters. The live scan identified seven physical host ports, including three USB-C / Thunderbolt 5 ports. The 68 tests cover companion deduplication, unknown models, missing registry data, internal-port exclusion, unknown speed/power handling, firmware ports, report privacy, paired display modes, chip-specific display budgets, unknown display limits, sanitized live charger and Dell USB-tree fixtures, stale identity removal, downstream hub ports, current values, ambiguous monitor mapping, measured power validation, card formats, unplugged card state, headphone routing and connector-specific stats. Dock regressions cover interface deduplication, binary port properties, internal branches, USB 2 accessories on companion sockets, generic names, external hubs, missing identities and independent cables. Windows native hardware behavior requires a Windows machine; the included Windows CI step compiles the helper but cannot substitute for hardware tests.
+
+### Windows dock grouping follow-up
+
+The Windows collector currently merges explicit companion-port relationships and excludes known internal ports, but does not reconstruct dock ownership. Before enabling equivalent grouping, collect the hub/device parent relationships and device container identities using SetupAPI/Configuration Manager, match devices by exact instance identity rather than the first vendor/product match, and map displays using Windows display-configuration routes where possible. Keep raw instance/container identifiers out of exported scans. Validate with a real dock, two identical adapters, USB 2 and USB 3 accessories, multiple monitors and unplug/replug. A shared host cable alone must not be treated as proof of enclosure ownership.
 
 ## Design and security
 

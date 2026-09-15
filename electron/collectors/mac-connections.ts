@@ -33,7 +33,7 @@ export function readIOKitProperties(node: Raw) {
 // alone do not make an interface (or a function driver) another USB device.
 const isDevice = (n: Raw) => /^(?:IOUSBHostDevice|IOUSBDevice)$/.test(n.IOObjectClass ?? "");
 const deviceName = (n: Raw) =>
-  String(n["USB Product Name"] ?? (n.IORegistryEntryName !== "IOUSBHostDevice" ? n.IORegistryEntryName : undefined) ?? (Number(n.bDeviceClass) === 9 ? "USB hub" : "USB device"));
+  String(n["USB Product Name"] ?? (n.IORegistryEntryName !== "IOUSBHostDevice" ? n.IORegistryEntryName : undefined) ?? (Number(n.bDeviceClass) === 9 ? (n["Device Speed"] === 2 ? "USB 2 hub" : n["Device Speed"] >= 3 ? "USB 3 hub" : "USB hub") : "USB device"));
 
 function registryNumber(value: unknown): number | undefined {
   if (typeof value === "number" && Number.isInteger(value) && value >= 0) return value;

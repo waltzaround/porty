@@ -362,6 +362,7 @@ body:has(.detail-panel[open]) .sidebar nav {
 }
 .machine-summary > svg {
   color: var(--secondary);
+  flex-shrink: 0;
 }
 .machine-summary > div {
   min-width: 0;
@@ -375,6 +376,7 @@ body:has(.detail-panel[open]) .sidebar nav {
   color: var(--secondary);
   font-size: 11px;
   margin-top: 3px;
+  line-height: 1.45;
 }
 .machine-summary > span {
   margin-left: auto;
@@ -382,14 +384,11 @@ body:has(.detail-panel[open]) .sidebar nav {
   color: var(--secondary);
   white-space: nowrap;
 }
-.summary-separator {
-  margin: 0 7px;
-}
 .filter-bar {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 .filter-bar > span {
   margin-left: auto;
@@ -424,7 +423,7 @@ body:has(.detail-panel[open]) .sidebar nav {
 .port-groups {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 36px;
 }
 .port-columns {
   --stat-count: 4;
@@ -1314,7 +1313,12 @@ details[open] > summary > svg:last-child {
 .topology-inspector dt { color:var(--secondary); }
 .topology-inspector dd { margin:0; overflow-wrap:anywhere; }
 .inspector-close { float:right; }
-.device-port-group { margin-bottom:28px; }
-.device-port-group > header { padding:4px 2px 12px; border-bottom:1px solid var(--border); margin-bottom:16px; }
-.device-port-group > header h2 { margin:0 0 5px; font-size:15px; font-weight:600; }
-.device-port-group > header p { margin:0; font-size:11px; color:var(--secondary); }
+.device-port-group {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.device-port-group > .machine-summary {
+  margin: 0;
+  padding: 0 1px;
+}
