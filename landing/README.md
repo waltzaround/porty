@@ -19,7 +19,7 @@ npm run build
 npm run preview
 ```
 
-Development runs at http://127.0.0.1:5180. The static output is `dist/`; preview uses port 4180. The build renders the React page into HTML, then hydrates it in the browser. No Node server is needed for hosting. The build-only renderer in `.prerender/` is excluded from `dist/`. No source maps are emitted. Fonts are self-hosted; the page uses no analytics, third-party font requests, or hardware access.
+Development runs at http://127.0.0.1:5180. The static output is `dist/`; preview uses port 4180. The build renders the React page into HTML, then hydrates it in the browser. No Node server is needed for hosting. The build-only renderer in `.prerender/` is excluded from `dist/`. No source maps are emitted. Fonts are self-hosted; the page does not request hardware access. Production website analytics are described below.
 
 ## SEO and AI search
 
@@ -75,3 +75,11 @@ npm test
 ```
 
 The tests start the production preview and cover raw HTML, no-JavaScript access, hydration, metadata and crawl-file consistency, preview/public URL validation, desktop and mobile interaction, keyboard dismissal, focus restoration, accessibility, and overflow. They also check that build-only code and source maps are absent from `dist/`. To use an already installed Chromium browser, set `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` to its executable. Build before running tests.
+
+## Website analytics
+
+Google Analytics uses measurement ID `G-68EK891W8D` and loads only on `porty.walt.online`. Local previews and the desktop app do not load it. The privacy dialog discloses website analytics.
+
+Actual download links send one `download_click` event with `download_platform` (`windows`, `mac-arm`, or `mac-intel`), `release_version`, `download_location` (`page` or `dialog`), `file_name`, `file_extension`, and `link_url`. Opening the download chooser and unavailable builds do not count. Links continue working when analytics is unavailable; events queued before the Google script loads are processed when it becomes available.
+
+Use `download_click` for download intent; it does not establish that a file finished downloading or was installed. This custom name avoids duplicating GA's automatic `file_download` event. Register the platform, version, and location parameters as event-scoped custom dimensions in GA if you want to use them in reports. You can mark `download_click` as a key event in GA.

@@ -85,7 +85,7 @@ test("download, privacy and FAQ work with keyboard dismissal", async ({
     page.getByRole("region", { name: "Is my hardware information private?" }),
   ).toContainText("Hardware scans run locally");
   await page.getByRole("button", { name: "Privacy", exact: true }).click();
-  await expect(page.getByRole("dialog")).toContainText("no analytics scripts");
+  await expect(page.getByRole("dialog")).toContainText("Google Analytics");
   await page.keyboard.press("Escape");
 });
 

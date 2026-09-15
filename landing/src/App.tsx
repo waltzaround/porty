@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/dialog";
 import { ProductScreenshots } from "@/components/ProductScreenshots";
 import { releases, releaseVersion } from "@/lib/releases";
+import { trackDownload } from "@/lib/analytics";
 import { product, questions } from "@/lib/product";
 
 function Logo({ inverse = false }: { inverse?: boolean }) {
@@ -70,7 +71,7 @@ function WindowsMark() {
   );
 }
 
-function ReleaseOptions() {
+function ReleaseOptions({ location }: { location: "page" | "dialog" }) {
   return (
     <div className="release-list">
       {releases.map((release) => (
@@ -84,7 +85,7 @@ function ReleaseOptions() {
           </div>
           {release.url ? (
             <Button asChild className="release-link">
-              <a href={release.url}>
+              <a href={release.url} onClick={() => trackDownload(release, location)}>
                 Download <ArrowDownToLine />
               </a>
             </Button>
@@ -330,7 +331,7 @@ function App() {
               <h2>Get Porty</h2>
               <details className="download-options">
                 <summary className="primary-cta download-summary">Get Porty <ArrowDownToLine size={17} /></summary>
-                <ReleaseOptions />
+                <ReleaseOptions location="page" />
               </details>
               <div className="download-platforms">
                 <AppleMark />
@@ -386,7 +387,7 @@ function App() {
               Choose the Porty build for your computer.
             </DialogDescription>
           </DialogHeader>
-          <ReleaseOptions />
+          <ReleaseOptions location="dialog" />
           <div className="release-note">
             <p>
               Preview release. Download links will appear as builds become
@@ -423,7 +424,10 @@ function App() {
                 This landing page shows screenshots captured in the actual
                 Windows app. It cannot inspect your computer’s ports and does
                 not ask for hardware access. Fonts and page assets are served
-                with the site; there are no analytics scripts.
+                with the site. This website uses Google Analytics to measure
+                visits and download clicks. Google may use cookies and process
+                browser, device, and usage information. Website analytics do not
+                include hardware scans from the desktop app.
               </p>
               <p>
                 If you choose a download, your browser will contact the release
