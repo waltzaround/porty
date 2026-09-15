@@ -20,7 +20,17 @@ The `Windows preview release` workflow builds the current app on GitHub's Window
 
 Downloads use `Porty-VERSION-windows-x64-setup.exe` and `Porty-VERSION-windows-x64-portable.exe`, accompanied by `SHA256SUMS.txt`. Only those public files are uploaded; private source maps and scan output are excluded. The release remains a draft until all assets upload successfully.
 
-The website's version-specific Windows URL is configured in `landing/.env.production`. Update it with each release and deploy only after that release is available. `VITE_WINDOWS_UNSIGNED=true` labels the download as an unsigned preview. macOS URLs remain empty until real packages are published.
+The website's version-specific URLs are configured in `landing/.env.production`. Update them with each release and deploy only after the corresponding assets are available. `VITE_WINDOWS_UNSIGNED=true` and `VITE_MAC_UNSIGNED=true` label preview builds that do not have publisher signing.
+
+## GitHub macOS preview releases
+
+The `macOS preview release` workflow follows successful `Windows preview release` runs automatically. It can also be dispatched on `main` with an existing published preview tag (for example `v1.0.3`). The resolver checks that Windows installer and portable assets are present and that the tag matches the package version. For automatic runs it also verifies the Windows run's commit.
+
+Apple Silicon and Intel jobs build the exact tagged source on `macos-15` (arm64) and `macos-15-intel` (x64). Both run parser tests, package verification, packaged-app smoke checks and size reporting. The publisher runs only when both jobs succeed. It adds `Porty-VERSION-mac-arm64.dmg`, `Porty-VERSION-mac-arm64.zip`, `Porty-VERSION-mac-x64.dmg`, `Porty-VERSION-mac-x64.zip` and `SHA256SUMS-macos.txt` to the existing preview, leaving Windows files and their checksum file intact.
+
+The app is not Developer ID signed or notarized in this preview workflow. Downloads and release notes state this explicitly. macOS 12 or later is required. Mac signing/notarization remains a separate release step requiring Apple credentials.
+
+Uploads are never clobbered. Identical assets can be reused, but conflicting hashes stop publication. If uploading fails partway through, rerun the failed publish job so it uses the original build artifacts, rather than rebuilding that version. The website uses the architecture-specific DMG URLs; ZIP files remain available on the GitHub release page. Publishing a GitHub release does not automatically deploy the website: update its release settings, verify the downloads, and run `npm run deploy` from `landing/`.
 
 ### Signed builds
 
