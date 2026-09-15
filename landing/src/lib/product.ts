@@ -4,7 +4,7 @@ export const product = {
   description:
     "Explore USB ports, connected devices and hub connections on macOS and Windows. Inspect reported link speeds and display modes with Porty’s local desktop app.",
   summary:
-    "Porty is a desktop app for macOS and Windows. Inspect USB ports, connected devices, link speeds, and display modes.",
+    "Explore the ports, devices, hubs, and displays on your Mac or Windows PC. See hardware specifications, supported features, and how your devices are connected.",
   features: [
     "USB connection map with hub branches, zoom, and device search",
     "Port inventory and connected-device details",
