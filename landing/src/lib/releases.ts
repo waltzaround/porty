@@ -32,4 +32,4 @@ export const releases = [
     url: releaseUrl(import.meta.env.VITE_DOWNLOAD_WINDOWS),
   },
 ];
-export const releaseVersion = import.meta.env.VITE_RELEASE_VERSION || "1.0.4";
+export const releaseVersion = import.meta.env.VITE_RELEASE_VERSION || "1.0.5";

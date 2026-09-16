@@ -1,5 +1,16 @@
 export const changelog = [
   {
+    version: "1.0.5",
+    publishedAt: "2026-09-16T11:01:11Z",
+    title: "Dock grouping and connection history",
+    changes: [
+      "Group supported docks and their displays together, with stacked resolutions and refresh rates.",
+      "Track connections and state changes in a session event log, with live USB and display events on macOS.",
+      "Recover from startup problems with reload, basic graphics, and diagnostic log options.",
+      "Keep scans responsive when individual hardware queries fail or time out.",
+    ],
+  },
+  {
     version: "1.0.4",
     publishedAt: "2026-09-15T19:19:34Z",
     title: "Mac startup fix",
