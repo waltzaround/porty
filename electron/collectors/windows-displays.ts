@@ -1,5 +1,6 @@
 import type { ConnectedDevice } from '../../shared/types';
 import { createHash } from 'node:crypto';
+import { windowsDeviceId } from './windows-topology';
 
 export interface WindowsDisplay {
   Id: string;
@@ -11,6 +12,7 @@ export interface WindowsDisplay {
   RefreshDenominator?: number;
   Internal?: boolean;
   ContainerId?: string;
+  AdapterUsbInstanceId?: string;
 }
 export function parseWindowsDisplays(displays: WindowsDisplay[] = [], containerFor?: (value?: string) => string | undefined): ConnectedDevice[] {
   const seen = new Set<string>();
@@ -29,6 +31,10 @@ export function parseWindowsDisplays(displays: WindowsDisplay[] = [], containerF
       id: `win-display-${d.Id ? createHash('sha256').update(d.Id).digest('hex').slice(0, 16) : index + 1}`, name: d.Name?.trim() || `Display ${index + 1}`, kind: 'display' as const,
       physicalDeviceId: d.Id && !d.Internal && ![6, 11, 13, -2147483648].includes(d.Technology ?? -1) ? containerFor?.(d.ContainerId) : undefined,
       detail: [connection, resolution, refreshHz === undefined ? undefined : `${refreshHz} Hz`, d.Internal ? 'Built-in panel' : undefined].filter(Boolean).join(' · '),
+      displayRoute: {
+        transport: d.Internal || [6, 11, 13, -2147483648].includes(d.Technology ?? -1) ? 'internal' as const : [15, 17].includes(d.Technology ?? -1) ? 'virtual' as const : d.AdapterUsbInstanceId ? 'usb' as const : d.Technology === 16 ? 'unknown' as const : 'native' as const,
+        ...(d.AdapterUsbInstanceId && /^USB\\VID_[\dA-F]{4}&PID_[\dA-F]{4}/i.test(d.AdapterUsbInstanceId) && !/&MI_[\dA-F]{2}/i.test(d.AdapterUsbInstanceId) ? { deviceId: windowsDeviceId(d.AdapterUsbInstanceId) } : {}),
+      },
       ...(validSize ? { displayMode: { resolution: resolution!, width: width!, height: height!, ...(refreshHz === undefined ? {} : { refreshHz }) } } : {}),
     }];
   });

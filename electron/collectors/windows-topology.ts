@@ -5,7 +5,8 @@ import { mergeWindowsCompanions, type WindowsData, type WindowsPort } from './wi
 
 const key = (value?: string) => (value ?? '').toLowerCase();
 const pathKey = (value: string) => key(value).replace(/^\\[\\?][?\\]\\/, '');
-const id = (value: string) => `win-device-${createHash('sha256').update(key(value)).digest('hex').slice(0, 16)}`;
+export const windowsDeviceId = (value: string) => `win-device-${createHash('sha256').update(key(value)).digest('hex').slice(0, 16)}`;
+const id = windowsDeviceId;
 const speed = (p: WindowsPort) => p.Flags & 4 ? '10 Gb/s or higher' : p.Flags & 1 ? '5 Gb/s or higher' : ['1.5 Mb/s', '12 Mb/s', '480 Mb/s', '5 Gb/s or higher'][p.Speed];
 
 export function windowsTopology(data: WindowsData) {
@@ -52,6 +53,8 @@ export function windowsTopology(data: WindowsData) {
       linkSpeed: p ? speed(p) : undefined,
       ...(parentRecord && !roots.has(parent) ? { parentId: id(parent), parentName: parentRecord.Name } : {}),
       usb: { internal: p?.PropertiesKnown ? !p.UserConnectable : undefined,
+        vendorId: /^[\dA-F]{4}$/i.test(p?.Vid ?? '') ? parseInt(p!.Vid!, 16) : (/VID_([\dA-F]{4})/i.test(instance) ? parseInt(instance.match(/VID_([\dA-F]{4})/i)![1], 16) : undefined),
+        productId: /^[\dA-F]{4}$/i.test(p?.Pid ?? '') ? parseInt(p!.Pid!, 16) : (/PID_([\dA-F]{4})/i.test(instance) ? parseInt(instance.match(/PID_([\dA-F]{4})/i)![1], 16) : undefined),
         containerId: container,
         route: p ? routes.get(p) : undefined,
       },

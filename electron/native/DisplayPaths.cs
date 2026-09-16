@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 
 // Read-only CCD queries. Monitor device paths and EDID identifiers stay inside this helper.
 public static class PortyDisplays {
@@ -38,6 +39,13 @@ public static class PortyDisplays {
     [DllImport("user32.dll")] static extern int GetDisplayConfigBufferSizes(uint flags, out uint paths, out uint modes);
     [DllImport("user32.dll")] static extern int QueryDisplayConfig(uint flags, ref uint paths, [Out] DisplayPath[] pathArray, ref uint modes, [Out] Mode[] modeArray, IntPtr topology);
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int DisplayConfigGetDeviceInfo(ref TargetName name);
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)] struct AdapterName {
+        public Header Header;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string DevicePath;
+    }
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int DisplayConfigGetDeviceInfo(ref AdapterName name);
+    [DllImport("cfgmgr32.dll")] static extern uint CM_Get_Parent(out uint parent, uint device, uint flags);
+    [DllImport("cfgmgr32.dll", CharSet = CharSet.Unicode)] static extern uint CM_Get_Device_ID(uint device, StringBuilder id, uint length, uint flags);
 
     [StructLayout(LayoutKind.Sequential)] struct DeviceInfo { public uint Size; public Guid Class; public uint DevInst; public IntPtr Reserved; }
     [StructLayout(LayoutKind.Sequential)] struct InterfaceData { public uint Size; public Guid Class; public uint Flags; public IntPtr Reserved; }
@@ -69,8 +77,38 @@ public static class PortyDisplays {
         } finally { SetupDiDestroyDeviceInfoList(set); }
     }
 
+    // Resolve the display adapter interface, then walk actual PnP parents to
+    // the physical USB device. A monitor container is not its dock's identity.
+    static string AdapterUsbInstanceId(Luid adapter) {
+        var name = new AdapterName { Header = new Header { Type = 4, Size = (uint)Marshal.SizeOf(typeof(AdapterName)), Adapter = adapter } };
+        if (DisplayConfigGetDeviceInfo(ref name) != 0 || String.IsNullOrWhiteSpace(name.DevicePath)) return null;
+        var set = SetupDiCreateDeviceInfoList(IntPtr.Zero, IntPtr.Zero);
+        if (set == IntPtr.Zero || set == new IntPtr(-1)) return null;
+        try {
+            var iface = new InterfaceData { Size = (uint)Marshal.SizeOf(typeof(InterfaceData)) };
+            if (!SetupDiOpenDeviceInterface(set, name.DevicePath, 0, ref iface)) return null;
+            var device = new DeviceInfo { Size = (uint)Marshal.SizeOf(typeof(DeviceInfo)) };
+            uint required;
+            bool resolved = SetupDiGetDeviceInterfaceDetail(set, ref iface, IntPtr.Zero, 0, out required, ref device);
+            if ((!resolved && Marshal.GetLastWin32Error() != 122) || device.DevInst == 0) return null;
+            uint cursor = device.DevInst;
+            var seen = new HashSet<uint>();
+            for (int depth = 0; depth < 64 && seen.Add(cursor); depth++) {
+                var id = new StringBuilder(512);
+                if (CM_Get_Device_ID(cursor, id, 512, 0) == 0) {
+                    string instance = id.ToString();
+                    if (instance.StartsWith("USB\\VID_", StringComparison.OrdinalIgnoreCase) && instance.IndexOf("&MI_", StringComparison.OrdinalIgnoreCase) < 0) return instance;
+                }
+                uint parent;
+                if (CM_Get_Parent(out parent, cursor, 0) != 0) break;
+                cursor = parent;
+            }
+            return null;
+        } finally { SetupDiDestroyDeviceInfoList(set); }
+    }
+
     public class Display {
-        public string Id, Name, ContainerId; public int Technology; public uint Width, Height;
+        public string Id, Name, ContainerId, AdapterUsbInstanceId; public int Technology; public uint Width, Height;
         public uint RefreshNumerator, RefreshDenominator; public bool Internal;
     }
     public class Result { public List<Display> Displays = new List<Display>(); public List<string> Warnings = new List<string>(); }
@@ -97,6 +135,7 @@ public static class PortyDisplays {
                     Id = target.Adapter.High.ToString("X8") + target.Adapter.Low.ToString("X8") + ":" + target.Id,
                     Name = named && !String.IsNullOrWhiteSpace(name.FriendlyName) ? name.FriendlyName : "Display " + (i + 1),
                     ContainerId = named ? ContainerId(name.DevicePath) : null,
+                    AdapterUsbInstanceId = AdapterUsbInstanceId(target.Adapter),
                     Technology = target.Technology,
                     RefreshNumerator = target.Refresh.Numerator, RefreshDenominator = target.Refresh.Denominator,
                     Internal = target.Technology == unchecked((int)0x80000000) || target.Technology == 6 || target.Technology == 11 || target.Technology == 13

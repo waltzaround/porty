@@ -34,7 +34,7 @@ test("overview values use active links and display modes, never the port maximum
   port.status = "available";
   assert.deepEqual(
     Object.values(currentPortValues(port)).map((v) => v.value),
-    ["—", "—", "—", "—"],
+    ["—", "—", "—", "—", "—"],
   );
 });
 
@@ -49,7 +49,7 @@ test("connected but unreported values do not fall back to manufacturer or cable 
   };
   assert.deepEqual(
     Object.values(currentPortValues(port)).map((v) => v.value),
-    Array(4).fill("Not reported"),
+    Array(5).fill("Not reported"),
   );
 });
 

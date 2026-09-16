@@ -1,4 +1,4 @@
-import type { Port } from "./types";
+import type { ConnectedDevice, Port } from "./types";
 import { getDisplaySupport } from "./display";
 
 export interface CurrentValue {
@@ -6,6 +6,21 @@ export interface CurrentValue {
   detail: string;
   reported: boolean;
   note?: string;
+  lines?: { id: string; label: string; value: string }[];
+}
+
+export function displayReadings(displays: ConnectedDevice[]) {
+  const counts = new Map<string, number>();
+  return displays.map((d, index) => {
+    const number = (counts.get(d.name) ?? 0) + 1;
+    counts.set(d.name, number);
+    const mode = d.displayMode;
+    return {
+      id: d.id ?? `display-${index}`,
+      label: displays.filter(other => other.name === d.name).length > 1 ? `${d.name} ${number}` : d.name,
+      value: mode ? `${mode.width} × ${mode.height} · ${mode.refreshHz == null ? 'Refresh not reported' : `${Number(mode.refreshHz.toFixed(3))} Hz`}` : 'Not reported',
+    };
+  });
 }
 
 export function currentPortValues(port: Port) {
@@ -51,6 +66,10 @@ export function currentPortValues(port: Port) {
         ))
       : undefined;
   return {
+    displays: monitors.length ? {
+      value: displayReadings(monitors).map(d => `${d.label}: ${d.value}`).join('\n'),
+      lines: displayReadings(monitors), detail: displayDetail, reported: modes.length > 0,
+    } : absent(video, displayDetail),
     data:
       data && data.value !== "Not reported"
         ? { value: data.value, detail: data.detail, reported: true }

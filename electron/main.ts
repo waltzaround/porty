@@ -5,14 +5,18 @@ import {
   shell,
   Menu,
   nativeTheme,
+  powerMonitor,
 } from "electron";
 import type { IpcMainInvokeEvent } from "electron";
 import path from "node:path";
 import { scanMachine } from "./collectors";
-import type { Scan } from "../shared/types";
+import { Monitoring } from './monitoring';
+import { healthLog, troubleshooting, windowRecovery } from './app-health';
 
 let mainWindow: BrowserWindow | null = null;
-let pending: Promise<Scan> | null = null;
+let monitoring: Monitoring;
+let recovery: ReturnType<typeof windowRecovery> | undefined;
+if (app.commandLine.hasSwitch('disable-gpu')) app.disableHardwareAcceleration();
 const devUrl = !app.isPackaged ? process.env.PORTY_DEV_URL : undefined;
 const iconPath = app.isPackaged
   ? path.join(process.resourcesPath, "icon.png")
@@ -24,17 +28,6 @@ function validate(event: IpcMainInvokeEvent) {
     event.senderFrame !== mainWindow.webContents.mainFrame
   )
     throw new Error("Untrusted request");
-}
-function scan() {
-  if (pending) return pending;
-  pending = scanMachine(
-    app.isPackaged
-      ? path.join(process.resourcesPath, "native")
-      : path.join(app.getAppPath(), "electron/native"),
-  ).finally(() => {
-    pending = null;
-  });
-  return pending;
 }
 async function createWindow() {
   mainWindow = new BrowserWindow({
@@ -70,14 +63,23 @@ async function createWindow() {
   mainWindow.webContents.session.setPermissionRequestHandler(
     (_web, _permission, callback) => callback(false),
   );
-  if (devUrl) await mainWindow.loadURL(devUrl);
-  else await mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
+  const window = mainWindow;
+  const load = () => devUrl ? window.loadURL(devUrl) : window.loadFile(path.join(__dirname, '../dist/index.html'));
+  recovery = windowRecovery(window, load);
   mainWindow.on("closed", () => {
     mainWindow = null;
+    recovery = undefined;
   });
+  await load().catch(() => recovery?.failed('initial-load-failed'));
 }
 app.setName("Porty");
 app.whenReady().then(async () => {
+  app.setAppLogsPath();
+  healthLog('app-start', `${app.getVersion()} ${process.platform} ${process.arch} Electron ${process.versions.electron}`);
+  const nativeDir = app.isPackaged ? path.join(process.resourcesPath, 'native') : path.join(app.getAppPath(), 'electron/native');
+  monitoring = new Monitoring(signal => scanMachine(nativeDir, signal), update => {
+    if (mainWindow && !mainWindow.webContents.isDestroyed()) mainWindow.webContents.send('porty:update', update);
+  }, process.platform === 'darwin' ? path.join(app.isPackaged ? process.resourcesPath : path.join(app.getAppPath(), 'build'), 'native/porty-events') : undefined);
   app.dock?.setIcon(iconPath);
   nativeTheme.on("updated", () => {
     if (process.platform !== "win32" || !mainWindow) return;
@@ -86,8 +88,14 @@ app.whenReady().then(async () => {
   });
   ipcMain.handle("porty:scan", (event) => {
     validate(event);
-    return scan();
+    return monitoring.scan();
   });
+  ipcMain.handle('porty:ready', event => { validate(event); recovery?.ready(); });
+  ipcMain.handle('porty:issue', (event, issue) => { validate(event); if (issue === 'renderer-error') healthLog('renderer-error-boundary'); });
+  ipcMain.handle('porty:history', event => { validate(event); return monitoring.snapshot(); });
+  ipcMain.handle('porty:clear-history', event => { validate(event); monitoring.clear(); });
+  ipcMain.handle('porty:monitoring', (event, enabled: unknown) => { validate(event); if (typeof enabled !== 'boolean') throw new Error('Invalid monitoring state'); monitoring.setEnabled(enabled); });
+  powerMonitor.on('resume', () => { if (monitoring.snapshot().monitoring.enabled) { monitoring.history.add({ type: 'info', name: 'Mac or PC woke from sleep', detail: 'Checking the current connections. Changes while asleep may not have been observed.', source: 'monitor' }); void monitoring.scan().catch(() => {}); } });
   ipcMain.handle("porty:external", async (event, value: unknown) => {
     validate(event);
     if (typeof value !== "string") throw new Error("Invalid link");
@@ -133,20 +141,24 @@ app.whenReady().then(async () => {
       {
         label: "View",
         submenu: [
-          ...(!app.isPackaged ? [{ role: "reload" as const }, { role: "toggleDevTools" as const }] : []),
+          { label: 'Reload Porty', accelerator: 'CmdOrCtrl+R', click: () => mainWindow?.webContents.reload() },
+          ...(!app.isPackaged ? [{ role: "toggleDevTools" as const }] : []),
           { role: "resetZoom" },
           { role: "zoomIn" },
           { role: "zoomOut" },
         ],
       },
       { label: "Window", submenu: [{ role: "minimize" }, { role: "close" }] },
+      { label: 'Help', submenu: [{ label: 'Troubleshooting…', click: () => void troubleshooting() }] },
     ]),
   );
   await createWindow();
+  monitoring.setEnabled(true);
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) void createWindow();
   });
-});
+}).catch(() => { healthLog('app-initialization-failed'); void troubleshooting(); });
+app.on('before-quit', () => monitoring?.stop());
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });

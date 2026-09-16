@@ -973,6 +973,11 @@ h1 > span:not(.headline-port) {
 .download-dialog [data-slot="dialog-header"] {
   text-align: left;
 }
+.download-version {
+  color: #706978;
+  font-size: 12px;
+  line-height: 1.5;
+}
 .download-dialog > div > img {
   margin: 0 0 14px;
 }

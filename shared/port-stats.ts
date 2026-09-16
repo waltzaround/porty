@@ -4,15 +4,12 @@ import { currentPortValues, type CurrentValue } from "./current";
 const columns: Record<Connector, string[]> = {
   "USB-C": [
     "Current data",
-    "Current resolution",
-    "Current refresh rate",
+    "Current displays",
     "Current power",
   ],
   "USB-A": ["Current data", "Current power"],
   "USB (unclassified)": [
     "Current data",
-    "Current resolution",
-    "Current refresh rate",
     "Current power",
   ],
   HDMI: ["Current resolution", "Current refresh rate", "Audio output"],
@@ -122,6 +119,7 @@ export function portStats(
   ];
   const metrics: Record<string, CurrentValue> = {
     "Current data": current.data,
+    "Current displays": current.displays,
     "Current resolution": current.resolution,
     "Current refresh rate": current.refresh,
     "Current power": current.power,

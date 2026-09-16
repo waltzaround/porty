@@ -165,8 +165,7 @@ test("card and headphone column labels describe their own stats", () => {
   ]);
   assert.deepEqual(portStatLabels("USB-C"), [
     "Current data",
-    "Current resolution",
-    "Current refresh rate",
+    "Current displays",
     "Current power",
   ]);
 });

@@ -86,6 +86,7 @@ export function attachCurrentDisplay(
   let matched = false;
   for (const monitor of monitors) {
     if (
+      ['usb', 'virtual', 'internal'].includes(monitor.displayRoute?.transport ?? '') ||
       !monitor.displayIdentity ||
       monitors.filter((d) => d.displayIdentity === monitor.displayIdentity)
         .length !== 1
@@ -97,11 +98,13 @@ export function attachCurrentDisplay(
     if (candidates.length !== 1) continue;
     candidates[0].port.devices.push({
       ...monitor,
+      displayRoute: { transport: 'native' },
       portMapping: "Monitor matched to this port’s active display identity.",
     });
     matched = true;
   }
   if (matched || routes.length) return;
+  if (ports.some(p => p.devices.some(d => d.usb?.vendorId === 0x17e9)) || monitors.some(d => ['usb', 'virtual', 'internal'].includes(d.displayRoute?.transport ?? ''))) return;
   // When identity is unavailable, a single native monitor and a single active
   // video connection can still be associated, with the inference disclosed.
   if (monitors.length !== 1) return;

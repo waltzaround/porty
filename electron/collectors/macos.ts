@@ -208,6 +208,7 @@ export function parseMacScan(
         name: String(display._name ?? "External display"),
         displayMode: readCurrentDisplayMode(display),
         displayIdentity: readDisplayIdentity(display),
+        displayRoute: { transport: /virtual|airplay/i.test(`${gpu._name} ${display.spdisplays_connection_type}`) ? 'virtual' : /DisplayLink/i.test(String(gpu._name)) ? 'usb' : 'unknown' },
         detail: String(
           display._spdisplays_resolution ??
             display.spdisplays_resolution ??
@@ -218,9 +219,7 @@ export function parseMacScan(
   // Virtual/USB graphics drivers do not establish a native DisplayPort route.
   const externalDisplays = devices.filter((d) => d.kind === "display");
   applyDisplayAudioStats(externalDisplays, array(data.SPAudioDataType));
-  if (!array(data.SPDisplaysDataType).some((gpu) => /DisplayLink|virtual|airplay/i.test(String(gpu._name)))) {
-    attachCurrentDisplay(ports, externalDisplays, physical ?? []);
-  }
+  attachCurrentDisplay(ports, externalDisplays, physical ?? []);
   return {
     machine: {
       name: profile?.name ?? String(hardware.machine_name ?? "Mac"),
@@ -238,61 +237,47 @@ export function parseMacScan(
   };
 }
 
-export async function scanMac(): Promise<Scan> {
+export async function scanMac(signal?: AbortSignal): Promise<Scan> {
+  return collectMacScan(command, signal);
+}
+
+// A blocked optional query must not hide the working USB/port inventory.
+// Keep independent sources separate so a denied media query can recover on
+// the next refresh without restarting or reinstalling the application.
+export async function collectMacScan(run: typeof command, signal?: AbortSignal): Promise<Scan> {
   const start = Date.now();
-  const [system, usb, version, physical, battery] = await Promise.allSettled([
-    command(
-      "/usr/sbin/system_profiler",
-      [
-        "SPHardwareDataType",
-        "SPThunderboltDataType",
-        "SPUSBDataType",
-        "SPDisplaysDataType",
-        "SPCardReaderDataType",
-        "SPAudioDataType",
-        "-json",
-      ],
-      40000,
-    ),
-    command("/usr/sbin/ioreg", ["-a", "-l", "-r", "-c", "AppleUSBHostPort"]),
-    command("/usr/bin/sw_vers", ["-productVersion"]),
-    command("/usr/sbin/ioreg", ["-a", "-l", "-r", "-c", "IOPort"]),
-    command("/usr/sbin/ioreg", ["-a", "-l", "-r", "-c", "AppleSmartBattery"]),
-  ]);
-  if (system.status === "rejected")
-    throw new Error(
-      "macOS System Information could not be read. Try scanning again.",
-    );
-  let registry: Raw[] | null = null;
-  if (usb.status === "fulfilled") {
-    try {
-      registry = array(parse(usb.value));
-    } catch {
-      /* Surface incomplete detection in the scan. */
+  const queries = [
+    ['/usr/sbin/system_profiler', ['SPHardwareDataType', '-json'], 10000],
+    ['/usr/sbin/system_profiler', ['SPUSBDataType', 'SPThunderboltDataType', '-json'], 20000],
+    ['/usr/sbin/system_profiler', ['SPDisplaysDataType', '-json'], 20000],
+    ['/usr/sbin/system_profiler', ['SPCardReaderDataType', 'SPAudioDataType', '-json'], 20000],
+    ['/usr/sbin/ioreg', ['-a', '-l', '-r', '-c', 'AppleUSBHostPort'], 10000],
+    ['/usr/sbin/ioreg', ['-a', '-l', '-r', '-c', 'IOPort'], 10000],
+    ['/usr/sbin/ioreg', ['-a', '-l', '-r', '-c', 'AppleSmartBattery'], 10000],
+    ['/usr/bin/sw_vers', ['-productVersion'], 5000],
+  ] as const;
+  const results = await Promise.allSettled(queries.map(([file, args, timeout]) => run(file, [...args], timeout, signal)));
+  if (signal?.aborted) throw new Error('The hardware scan timed out. Try refreshing again.');
+  const notes: string[] = [];
+  const labels = ['Computer information', 'USB and Thunderbolt inventory', 'Display information', 'Audio and card-reader information', 'USB registry', 'Physical connector state', 'Power telemetry'];
+  function read(index: number, format: 'json' | 'plist'): any {
+    const result = results[index];
+    if (result.status === 'fulfilled') {
+      try {
+        const value = format === 'json' ? JSON.parse(result.value) : parse(result.value);
+        if (value && typeof value === 'object' && (format !== 'plist' || Array.isArray(value))) return value;
+      } catch { /* Preserve the other sources and surface this missing reading. */ }
     }
+    const denied = result.status === 'rejected' && /permission|not permitted|access.*denied|EACCES|EPERM/i.test(String(result.reason));
+    notes.push(`${labels[index]} ${denied ? 'was blocked by macOS or device policy' : 'could not be read'}. Other available readings are shown. Refresh to retry.`);
+    return null;
   }
-  let physicalPorts: Raw[] | null = null;
-  if (physical.status === "fulfilled") {
-    try {
-      physicalPorts = array(parse(physical.value));
-    } catch {
-      /* Report missing physical state. */
-    }
-  }
-  let powerTelemetry: Raw | null = null;
-  if (battery.status === "fulfilled") {
-    try {
-      powerTelemetry = array(parse(battery.value))[0] ?? null;
-    } catch {
-      /* Current power remains unreported when optional telemetry is unavailable. */
-    }
-  }
-  return parseMacScan(
-    JSON.parse(system.value),
-    registry,
-    `macOS ${version.status === "fulfilled" ? version.value.trim() : ""}`,
-    Date.now() - start,
-    physicalPorts,
-    powerTelemetry,
-  );
+  const hardware = read(0, 'json'), usbInfo = read(1, 'json'), displayInfo = read(2, 'json'), media = read(3, 'json');
+  const registry = read(4, 'plist'), physical = read(5, 'plist'), battery = read(6, 'plist');
+  if (!hardware && !usbInfo && !displayInfo && !media && !registry && !physical) throw new Error('macOS hardware information is unavailable. Refresh to retry. If macOS asks to allow an accessory, unlock the Mac and reconnect it. Managed restrictions may require your administrator.');
+  const version = results[7];
+  const scan = parseMacScan({ ...hardware, ...usbInfo, ...displayInfo, ...media }, registry, `macOS${version.status === 'fulfilled' ? ` ${version.value.trim()}` : ''}`, Date.now() - start, physical, battery?.[0] ?? null);
+  scan.collection = { usb: registry !== null, displays: Array.isArray(displayInfo?.SPDisplaysDataType), ports: physical !== null };
+  scan.warnings.push(...notes);
+  return scan;
 }

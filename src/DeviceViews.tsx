@@ -35,9 +35,13 @@ import {
 } from "../shared/topology-layout";
 import type { Port } from "../shared/types";
 import { monitorAssociations } from "../shared/monitor-associations";
+import type { PhysicalDeviceGroup } from '../shared/device-groups';
+import { DeviceGroupSummary } from './DeviceGroupSummary';
 
 function nodeIcon(node: TopologyNode) {
   if (node.id === "computer") return Laptop;
+  if (node.group?.kind === 'monitor') return Monitor;
+  if (node.group?.kind === 'dock') return Cable;
   if (node.device?.kind === "hub") return Network;
   if (node.device?.kind === "display") return Monitor;
   if (node.port)
@@ -67,10 +71,12 @@ export function DeviceViews({
   ports,
   devices,
   query = "",
+  groups = [],
 }: {
   ports: Port[];
   devices: InventoryDevice[];
   query?: string;
+  groups?: PhysicalDeviceGroup[];
 }) {
   const [tab, setTab] = useState("Node view");
   const [selection, setSelection] = useState<{
@@ -88,7 +94,7 @@ export function DeviceViews({
     left: number;
     top: number;
   } | null>(null);
-  const nodes = useMemo(() => deviceTopology(ports, devices), [ports, devices]);
+  const nodes = useMemo(() => deviceTopology(ports, devices, groups), [ports, devices, groups]);
   const associations = useMemo(() => monitorAssociations(devices), [devices]);
   const root = nodes.find((node) => node.id === branch) ?? nodes[0];
   const search = query.trim().toLowerCase();
@@ -455,7 +461,7 @@ export function DeviceViews({
                           className={`node-indicator ${node.uncertain ? "unknown" : ""}`}
                           title={
                             node.uncertain
-                              ? "Upstream mapping not reported"
+                              ? "Connection inferred or upstream not reported"
                               : "System detected"
                           }
                         />
@@ -472,7 +478,7 @@ export function DeviceViews({
               </span>
               <span>
                 <i className="dashed" />
-                Upstream not reported
+                Inferred or unreported
               </span>
               <span className="map-hint">
                 <CircleHelp size={12} />
@@ -517,7 +523,7 @@ export function DeviceViews({
                 {selection?.cable
                   ? "Cable details"
                   : selected.device?.kind === "hub"
-                    ? "Hub details"
+                    ? selected.group?.kind === 'dock' ? 'Dock details' : "Hub details"
                     : "Device details"}
               </h3>
               <h4 className="inspector-device-name">
@@ -528,7 +534,7 @@ export function DeviceViews({
               <span className="inspector-badge">
                 <i />
                 {selected.uncertain
-                  ? "Upstream not reported"
+                  ? selected.device?.portMapping?.startsWith('Inferred:') ? 'Inferred connection' : "Upstream not reported"
                   : "System detected"}
               </span>
               {selection?.cable ? (
@@ -572,6 +578,12 @@ export function DeviceViews({
                       selected.port?.protocol ||
                       "This computer is the host for the detected connections."}
                   </p>
+                  {selected.group && <>
+                    <DeviceGroupSummary group={selected.group} />
+                    <details className="integrated-components"><summary>Integrated components · {selected.group.members.length}</summary>
+                      {selected.group.members.map(d => <div key={d.id}><strong>{d.name}</strong><small>{d.linkSpeed ?? d.detail}</small></div>)}
+                    </details>
+                  </>}
                   {selected.device?.id &&
                     associations.has(selected.device.id) && (
                       <p className="inspector-callout">

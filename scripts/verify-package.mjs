@@ -11,6 +11,9 @@ const { executable, resources } = packagePaths();
 if (process.platform === "darwin") {
   const app = path.resolve(resources, "../..");
   execFileSync("codesign", ["--verify", "--deep", "--strict", "--verbose=2", app], { stdio: "inherit" });
+  const listener = path.join(resources, 'native/porty-events');
+  assert.ok((await stat(listener)).isFile(), 'Missing macOS connection event listener');
+  execFileSync('codesign', ['--verify', '--strict', listener], { stdio: 'inherit' });
 }
 const archive = path.join(resources, "app.asar");
 const files = asar.listPackage(archive).map(file => file.replaceAll("\\", "/").replace(/^\//, ""));

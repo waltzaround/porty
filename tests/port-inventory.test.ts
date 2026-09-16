@@ -67,18 +67,25 @@ test('external hubs stay separate and missing identity never merges companion so
   assert.equal(groups.length, 3);
   assert.equal(groups[2].name, 'External hub');
   for (const d of port.devices) if (d.usb) d.usb.containerId = undefined;
-  const unpaired = portInventory(scan).find(g => g.name === 'DELL U2721DE')!;
-  assert.ok(unpaired.ports.filter(p => p.connector.startsWith('USB')).length > 4);
+  const unpaired = portInventory(scan).slice(1);
+  assert.ok(unpaired.flatMap(g => g.ports).filter(p => p.connector.startsWith('USB')).length > 4);
+  assert.equal(unpaired.find(g => g.name === 'DELL U2721DE')!.ports.length, 1);
 });
 
-test('ambiguous monitors and independent host cables remain separate', () => {
+test('multiple mapped monitors share a connection group and independent host cables remain separate', () => {
   const { scan, port } = dockScan();
   port.devices.push({ id: 'second-monitor', name: 'Second monitor', kind: 'display', detail: 'Display', portMapping: 'Same upstream connection' });
   let groups = portInventory(scan);
-  assert.equal(groups.find(g => g.name === 'DELL U2721DE')!.ports.length, 1);
-  assert.equal(groups.find(g => g.name === 'Second monitor')!.ports.length, 1);
+  assert.equal(groups.length, 2);
+  assert.equal(groups[1].physical!.displays.length, 2);
+  assert.ok(groups[1].physical!.displays.every(d => d.evidence === 'inferred'));
   const secondPort = scan.ports.find(p => p.id === 'mac-usbc-1')!;
   secondPort.devices = structuredClone(port.devices.filter(d => d.kind !== 'display'));
+  for (const d of secondPort.devices) {
+    if (d.id) d.id += '-second';
+    if (d.parentId) d.parentId += '-second';
+    for (const hp of d.hubPorts ?? []) hp.deviceIds = hp.deviceIds?.map(id => id + '-second');
+  }
   groups = portInventory(scan);
   assert.equal(new Set(groups.map(g => g.id)).size, groups.length);
   assert.equal(groups.flatMap(g => g.ports).filter(p => p.connector === 'Ethernet').length, 2);

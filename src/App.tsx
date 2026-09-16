@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   BookOpen,
+  Activity,
   CheckCheck,
   ChevronDown,
   ChevronRight,
@@ -38,7 +39,11 @@ import { demoScan } from "../shared/demo";
 import { currentPortValues, type CurrentValue } from "../shared/current";
 import { displayAudioValue, portCapabilities, portSections, portStatLabels, portStats } from "../shared/port-stats";
 import { portInventory } from "../shared/port-inventory";
+import { deviceTopology } from '../shared/topology';
 import { DeviceViews } from "./DeviceViews";
+import { DeviceGroupSummary } from './DeviceGroupSummary';
+import { EventLog } from './EventLog';
+import type { EventHistory } from '../shared/events';
 import { PortGlyph } from "./PortGlyph";
 
 declare global {
@@ -123,11 +128,11 @@ function HubPorts({ device }: { device: ConnectedDevice }) {
 }
 function CurrentCell({ metric, className = "" }: { metric: CurrentValue; className?: string }) {
   return <span className={`current-cell ${className} ${metric.reported ? "" : "secondary-text"}`} title={metric.detail}>
-    {metric.value.split(" + ").map((value) => <span className="current-reading" key={value}>{value}</span>)}
+    {metric.lines ? metric.lines.map(line => <span className="display-reading" key={line.id}><small>{line.label}</small><span>{line.value}</span></span>) : metric.value.split(" + ").map((value) => <span className="current-reading" key={value}>{value}</span>)}
     {metric.note && <small>{metric.note}</small>}
   </span>;
 }
-function PortRow({ port, onSelect }: { port: Port; onSelect: () => void }) {
+function PortRow({ port, onSelect, attachedName }: { port: Port; onSelect: () => void; attachedName?: string }) {
   const stats = portStats(port);
   const monitor = port.devices.find(d => d.kind === "display" && d.portMapping);
   return (
@@ -141,9 +146,9 @@ function PortRow({ port, onSelect }: { port: Port; onSelect: () => void }) {
         <span>
           <strong>{port.name}</strong>
           <small>
-            {monitor?.name ?? port.devices[0]?.name ??
+            {attachedName ?? monitor?.name ?? port.devices[0]?.name ??
               (port.connection?.active ? port.connector === "SD card" ? "Card inserted" : "Cable connected" : port.protocol)}
-            {!monitor && port.devices.length > 1 ? ` +${port.devices.length - 1}` : ""}
+            {!attachedName && !monitor && port.devices.length > 1 ? ` +${port.devices.length - 1}` : ""}
           </small>
         </span>
       </span>
@@ -647,7 +652,8 @@ export default function App() {
   );
   const [loading, setLoading] = useState(!!window.porty);
   const [error, setError] = useState("");
-  const [view, setView] = useState<"ports" | "devices" | "guide">("ports");
+  const [view, setView] = useState<"ports" | "devices" | "guide" | 'events'>("ports");
+  const [history, setHistory] = useState<EventHistory>({ events: [], monitoring: { enabled: !!window.porty, mode: 'polling', detail: 'Starting connection monitoring…' } });
   const [connector, setConnector] = useState<Connector | "all">("all");
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("all");
@@ -656,6 +662,10 @@ export default function App() {
   const [toast, setToast] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const busyRef = useRef(false);
+  const applyScan = useCallback((result: Scan) => {
+    setScan(result); setError('');
+    setSelected(old => old ? (portInventory(result).flatMap(g => g.ports).find(p => p.id === old.id) ?? null) : null);
+  }, []);
   const rescan = useCallback(async () => {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -663,10 +673,7 @@ export default function App() {
     setError("");
     try {
       const result = window.porty ? await window.porty.scan() : demoScan();
-      setScan(result);
-      setSelected((old) =>
-        old ? (portInventory(result).flatMap(g => g.ports).find((p) => p.id === old.id) ?? null) : null,
-      );
+      applyScan(result);
     } catch (e) {
       setError(
         e instanceof Error
@@ -677,15 +684,22 @@ export default function App() {
       setLoading(false);
       busyRef.current = false;
     }
-  }, []);
+  }, [applyScan]);
   useEffect(() => {
-    if (window.porty) void rescan();
-  }, [rescan]);
+    if (!window.porty) return;
+    const stop = window.porty.onUpdate(update => {
+      setHistory({ events: update.events, monitoring: update.monitoring });
+      if (update.scan) applyScan(update.scan);
+      if (update.error) setError(update.error);
+    });
+    void window.porty.history().then(setHistory).catch(() => setError('The hardware scanner could not be reached. Use View → Reload Porty to retry.'));
+    void rescan();
+    return stop;
+  }, [rescan, applyScan]);
   useEffect(() => {
-    if (!auto || !window.porty || scan?.demo) return;
-    const timer = window.setInterval(() => void rescan(), 15000);
-    return () => clearInterval(timer);
-  }, [auto, rescan, scan?.demo]);
+    if (!window.porty) return;
+    void window.porty.setMonitoring(auto && !scan?.demo).catch(() => setError('Connection monitoring could not be changed. Use View → Reload Porty to retry.'));
+  }, [auto, scan?.demo]);
   useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(() => setToast(""), 3500);
@@ -709,6 +723,7 @@ export default function App() {
   }, []);
   const hostPorts = scan?.ports ?? [];
   const devicePortGroups = useMemo(() => scan ? portInventory(scan) : [], [scan]);
+  const physicalGroups = useMemo(() => devicePortGroups.flatMap(g => g.physical ? [g.physical] : []), [devicePortGroups]);
   const ports = useMemo(() => devicePortGroups.flatMap(g => g.ports), [devicePortGroups]);
   const types = CONNECTORS.filter((type) =>
     ports.some((p) => p.connector === type),
@@ -746,6 +761,7 @@ export default function App() {
       )
       .map((d) => ({ ...d, port: "System inventory" })),
   ].filter((d, i, all) => !d.id || all.findIndex((x) => x.id === d.id) === i);
+  const deviceCount = deviceTopology(hostPorts, devices, physicalGroups).filter(n => n.device).length;
   function navigate(type: Connector | "all") {
     setView("ports");
     setConnector(type);
@@ -763,7 +779,7 @@ export default function App() {
   const title =
     view === "guide"
       ? "Connection guide"
-      : view === "devices"
+      : view === 'events' ? 'Event log' : view === "devices"
         ? "Connected devices"
         : connector === "all"
           ? "All ports"
@@ -830,6 +846,7 @@ export default function App() {
             </span>
             <span>Connected devices</span>
           </button>
+          <button className={`nav-item ${view === 'events' ? 'active' : ''}`} aria-current={view === 'events' ? 'page' : undefined} onClick={() => setView('events')}><span className="nav-icon gray"><Activity size={14} /></span><span>Event log</span></button>
           <h2>Connector types</h2>
           {types.map((type) => (
             <button
@@ -906,20 +923,23 @@ export default function App() {
               </button>
             </div>
           )}
-          {view === "guide" ? (
+          {view === 'events' ? <EventLog history={history} demo={!window.porty || !!scan?.demo} clear={() => { if (window.porty) void window.porty.clearHistory().catch(() => setToast('Could not clear the event log.')); }} /> : view === "guide" ? (
             <Guide />
           ) : loading && !scan ? (
             <div className="empty-state" role="status">
               <LoaderCircle size={25} className="spin" />
               <h2>Scanning ports…</h2>
+              <p>Reading the information available from macOS or Windows. If a device prompt appears, respond there; unavailable readings will be labelled.</p>
             </div>
+          ) : !scan ? (
+            <div className="empty-state"><Info size={25} /><h2>Hardware information is unavailable</h2><p>Refresh to retry. If macOS shows an accessory prompt, respond there. Startup help is available under Help → Troubleshooting.</p><button className="button" onClick={() => void rescan()}>Try again</button></div>
           ) : (
             scan && (
               <>
                 {view === "devices" ? (
                   <>
-                    <DeviceHeader name={scan.machine.name} detail={`${scan.machine.chip || scan.machine.model} · ${scan.machine.os}`} kind="computer" summary={`${ports.length} ports · ${devices.length} devices`} />
-                    <DeviceViews ports={hostPorts} devices={devices} query={query} />
+                    <DeviceHeader name={scan.machine.name} detail={`${scan.machine.chip || scan.machine.model} · ${scan.machine.os}`} kind="computer" summary={`${ports.length} ports · ${deviceCount} devices`} />
+                    <DeviceViews ports={hostPorts} devices={devices} groups={physicalGroups} query={query} />
                   </>
                 ) : (
                   <>
@@ -957,9 +977,14 @@ export default function App() {
                         <DeviceHeader
                           name={owner.name}
                           detail={owner.id === "host" ? `${scan.machine.chip || scan.machine.model} · ${scan.machine.os}` : owner.detail}
-                          kind={owner.id === "host" ? "computer" : owner.ports.some(p => p.devices.some(d => d.kind === "display")) ? "display" : "device"}
+                          kind={owner.id === "host" ? "computer" : owner.physical?.kind === 'dock' ? 'device' : owner.ports.some(p => p.devices.some(d => d.kind === "display")) ? "display" : "device"}
                         />
+                        {owner.physical?.kind === 'dock' && <DeviceGroupSummary group={owner.physical} onDisplay={id => setSelected(owner.ports.find(p => p.devices.some(d => d.id === id)) ?? null)} />}
+                        <details className="device-connections" open>
+                        <summary>{owner.physical?.kind === 'dock' ? 'Ports & connected devices' : 'Ports'}<ChevronDown size={13} /></summary>
+                        <div className="device-port-sections">
                         {CONNECTORS.map((type) => {
+                        if (owner.physical?.kind === 'dock' && type === 'Display (unclassified)') return null;
                         const group = visible.filter(
                           (p) => p.connector === type,
                         );
@@ -984,6 +1009,7 @@ export default function App() {
                                 <PortRow
                                   port={port}
                                   key={port.id}
+                                  attachedName={owner.id === 'host' ? (() => { const groups = devicePortGroups.filter(g => g.physical?.upstreamPortId === port.id && !g.physical.parentGroupId); return groups.length === 1 ? groups[0].name : undefined; })() : undefined}
                                   onSelect={() => setSelected(port)}
                                 />
                               ))}
@@ -991,6 +1017,8 @@ export default function App() {
                           </section>
                         );
                       })}
+                        </div>
+                        </details>
                       </section>;
                       })}
                     </div>
@@ -1048,7 +1076,7 @@ export default function App() {
             </time>
           )}
           <label className="auto-refresh">
-            <span>Auto-refresh · 15s</span>
+            <span title={history.monitoring.detail}>{history.monitoring.mode === 'live' ? 'Auto-refresh · live + 15s' : 'Auto-refresh · 15s'}</span>
             <input
               type="checkbox"
               role="switch"

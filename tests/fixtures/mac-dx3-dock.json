@@ -1,0 +1,499 @@
+{
+  "machine": {
+    "name": "Test Mac",
+    "model": "Mac",
+    "chip": "Apple silicon",
+    "os": "macOS",
+    "platform": "darwin"
+  },
+  "ports": [
+    {
+      "id": "mac-usbc-1",
+      "name": "USB-C 1",
+      "connector": "USB-C",
+      "location": "Host",
+      "status": "connected",
+      "protocol": "Thunderbolt 5",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": true,
+        "transports": [
+          "CC",
+          "USB3",
+          "USB2",
+          "DisplayPort"
+        ],
+        "cable": [],
+        "power": [
+          {
+            "label": "Current power input",
+            "value": "3.4 W",
+            "detail": "Measured host input",
+            "evidence": "detected"
+          },
+          {
+            "label": "Selected power input",
+            "value": "100 W",
+            "detail": "Negotiated limit",
+            "evidence": "detected"
+          }
+        ]
+      },
+      "devices": [
+        {
+          "id": "usb-1",
+          "name": "USB2.1 Hub",
+          "kind": "hub",
+          "detail": "USB device",
+          "linkSpeed": "480 Mb/s",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 1552,
+            "route": "",
+            "containerId": "enclosure-1"
+          },
+          "hubPorts": [
+            {
+              "number": 1,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            },
+            {
+              "number": 4,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "USB2.1 Hub"
+              ],
+              "deviceIds": [
+                "usb-2"
+              ]
+            },
+            {
+              "number": 5,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "Billboard Device"
+              ],
+              "deviceIds": [
+                "usb-4"
+              ]
+            },
+            {
+              "number": 2,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            },
+            {
+              "number": 3,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            }
+          ]
+        },
+        {
+          "id": "usb-2",
+          "name": "USB2.1 Hub",
+          "kind": "hub",
+          "detail": "USB device",
+          "parentId": "usb-1",
+          "parentName": "USB2.1 Hub",
+          "linkSpeed": "480 Mb/s",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 1552,
+            "route": "/4",
+            "internal": true,
+            "containerId": "enclosure-2"
+          },
+          "hubPorts": [
+            {
+              "number": 1,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            },
+            {
+              "number": 2,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            },
+            {
+              "number": 3,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "Sennheiser Profile"
+              ],
+              "deviceIds": [
+                "usb-3"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "usb-3",
+          "name": "Sennheiser Profile",
+          "kind": "device",
+          "detail": "USB device",
+          "parentId": "usb-2",
+          "parentName": "USB2.1 Hub",
+          "linkSpeed": "12 Mb/s",
+          "usb": {
+            "vendorId": 4983,
+            "productId": 4352,
+            "route": "/4/3",
+            "internal": false
+          }
+        },
+        {
+          "id": "usb-4",
+          "name": "Billboard Device",
+          "kind": "device",
+          "detail": "USB device",
+          "parentId": "usb-1",
+          "parentName": "USB2.1 Hub",
+          "linkSpeed": "12 Mb/s",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 3841,
+            "route": "/5",
+            "internal": true,
+            "containerId": "enclosure-1"
+          }
+        },
+        {
+          "id": "usb-5",
+          "name": "USB3.2 Hub",
+          "kind": "hub",
+          "detail": "USB device",
+          "linkSpeed": "10 Gb/s or higher",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 1573,
+            "route": "",
+            "containerId": "enclosure-1"
+          },
+          "hubPorts": [
+            {
+              "number": 1,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "ALOGIC DX3 Docking Station"
+              ],
+              "deviceIds": [
+                "usb-6"
+              ]
+            },
+            {
+              "number": 4,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "USB3.2 Hub"
+              ],
+              "deviceIds": [
+                "usb-7"
+              ]
+            },
+            {
+              "number": 2,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            },
+            {
+              "number": 3,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            }
+          ]
+        },
+        {
+          "id": "usb-6",
+          "name": "ALOGIC DX3 Docking Station",
+          "kind": "device",
+          "detail": "USB device",
+          "parentId": "usb-5",
+          "parentName": "USB3.2 Hub",
+          "linkSpeed": "5 Gb/s",
+          "usb": {
+            "vendorId": 6121,
+            "productId": 24576,
+            "route": "/1",
+            "internal": true,
+            "containerId": "enclosure-3"
+          }
+        },
+        {
+          "id": "usb-7",
+          "name": "USB3.2 Hub",
+          "kind": "hub",
+          "detail": "USB device",
+          "parentId": "usb-5",
+          "parentName": "USB3.2 Hub",
+          "linkSpeed": "5 Gb/s",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 1568,
+            "route": "/4",
+            "internal": true,
+            "containerId": "enclosure-2"
+          },
+          "hubPorts": [
+            {
+              "number": 1,
+              "internal": true,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "USB Storage"
+              ],
+              "deviceIds": [
+                "usb-8"
+              ]
+            },
+            {
+              "number": 2,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "connected",
+              "devices": [
+                "Logitech StreamCam"
+              ],
+              "deviceIds": [
+                "usb-9"
+              ]
+            },
+            {
+              "number": 3,
+              "internal": false,
+              "connector": "USB (unclassified)",
+              "status": "available",
+              "devices": [],
+              "deviceIds": []
+            }
+          ]
+        },
+        {
+          "id": "usb-8",
+          "name": "USB Storage",
+          "kind": "device",
+          "detail": "USB device",
+          "parentId": "usb-7",
+          "parentName": "USB3.2 Hub",
+          "linkSpeed": "5 Gb/s",
+          "usb": {
+            "vendorId": 1507,
+            "productId": 1892,
+            "route": "/4/1",
+            "internal": true,
+            "containerId": "enclosure-1"
+          }
+        },
+        {
+          "id": "usb-9",
+          "name": "Logitech StreamCam",
+          "kind": "device",
+          "detail": "USB device",
+          "parentId": "usb-7",
+          "parentName": "USB3.2 Hub",
+          "linkSpeed": "5 Gb/s",
+          "usb": {
+            "vendorId": 1133,
+            "productId": 2195,
+            "route": "/4/2",
+            "internal": false
+          }
+        },
+        {
+          "id": "usb-10",
+          "name": "USB-C power source",
+          "kind": "power",
+          "detail": "Power source"
+        }
+      ]
+    },
+    {
+      "id": "mac-usbc-2",
+      "name": "USB-C 2",
+      "connector": "USB-C",
+      "location": "Host",
+      "status": "available",
+      "protocol": "Thunderbolt 5",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": false,
+        "transports": [],
+        "cable": [],
+        "power": []
+      },
+      "devices": []
+    },
+    {
+      "id": "mac-usbc-3",
+      "name": "USB-C 3",
+      "connector": "USB-C",
+      "location": "Host",
+      "status": "available",
+      "protocol": "Thunderbolt 5",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": false,
+        "transports": [],
+        "cable": [],
+        "power": []
+      },
+      "devices": []
+    },
+    {
+      "id": "mac-hdmi",
+      "name": "HDMI",
+      "connector": "HDMI",
+      "location": "Host",
+      "status": "available",
+      "protocol": "Digital video & audio",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": false,
+        "transports": [],
+        "cable": [],
+        "power": []
+      },
+      "devices": []
+    },
+    {
+      "id": "mac-sd",
+      "name": "SDXC card reader",
+      "connector": "SD card",
+      "location": "Host",
+      "status": "available",
+      "protocol": "SDXC",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": false,
+        "transports": [],
+        "cable": [],
+        "power": []
+      },
+      "devices": []
+    },
+    {
+      "id": "mac-audio",
+      "name": "Headphone jack",
+      "connector": "Audio",
+      "location": "Host",
+      "status": "unknown",
+      "protocol": "3.5 mm audio",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "devices": []
+    },
+    {
+      "id": "mac-magsafe",
+      "name": "MagSafe 3",
+      "connector": "MagSafe",
+      "location": "Host",
+      "status": "available",
+      "protocol": "Magnetic charging",
+      "capabilities": [],
+      "evidence": "detected",
+      "source": "Sanitized DX3 fixture",
+      "connection": {
+        "active": false,
+        "transports": [],
+        "cable": [],
+        "power": []
+      },
+      "devices": []
+    }
+  ],
+  "devices": [
+    {
+      "id": "display-1",
+      "name": "MSI MD272QXP",
+      "kind": "display",
+      "detail": "External display",
+      "displayMode": {
+        "resolution": "2560 × 1440",
+        "width": 2560,
+        "height": 1440,
+        "refreshHz": 60
+      },
+      "displayRoute": {
+        "transport": "unknown"
+      }
+    },
+    {
+      "id": "display-2",
+      "name": "Q27B3M",
+      "kind": "display",
+      "detail": "External display",
+      "displayMode": {
+        "resolution": "2560 × 1440",
+        "width": 2560,
+        "height": 1440,
+        "refreshHz": 60
+      },
+      "displayRoute": {
+        "transport": "unknown"
+      }
+    },
+    {
+      "id": "display-3",
+      "name": "Q27B3M",
+      "kind": "display",
+      "detail": "External display",
+      "displayMode": {
+        "resolution": "2560 × 1440",
+        "width": 2560,
+        "height": 1440,
+        "refreshHz": 60
+      },
+      "displayRoute": {
+        "transport": "unknown"
+      }
+    }
+  ],
+  "scannedAt": "2026-09-16T00:00:00Z",
+  "durationMs": 0,
+  "warnings": [],
+  "demo": false
+}

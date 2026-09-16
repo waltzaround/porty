@@ -13,10 +13,15 @@ Ever wondered what's plugged into which hub, how fast a USB connection is runnin
 - **Follow your connections.** Explore devices and USB hubs in a visual connection map.
 - **Find the right port.** Browse by connector type and see what's connected.
 - **See what's happening now.** Check reported USB link speeds, display resolutions, refresh rates, and charging information.
+- **Catch intermittent connections.** The event log records USB/display notifications on Mac and compares scans for other reported changes. Save the session history when investigating a dock that reconnects unexpectedly.
 - **Look a little closer.** Open a device or port for its capabilities and the information behind them.
 - **Keep it local.** Hardware scans run on your computer. No account, telemetry, or cloud service required.
 
 Porty shows what your operating system reports and clearly labels information from manufacturer specifications. If something can't be determined, it stays **unreported**. Available details vary by computer, operating system, cable, and device.
+
+## Troubleshooting
+
+If Porty runs with a blank window, use **View → Reload Porty** or **Help → Troubleshooting**. Startup recovery and local diagnostics work independently of the hardware scan. Unavailable readings are not proof that a permission was denied; see [startup and accessory help](docs/TROUBLESHOOTING.md).
 
 ## Try Porty
 

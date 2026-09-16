@@ -91,6 +91,11 @@ export interface ConnectedDevice {
   linkSpeed?: string;
   displayMode?: DisplayResolution;
   displayIdentity?: string;
+  displayRoute?: {
+    transport: 'native' | 'usb' | 'virtual' | 'internal' | 'unknown';
+    // Opaque device ID matching the USB inventory, never a raw hardware path.
+    deviceId?: string;
+  };
   audioOutput?: { sampleRateHz?: number; channels: number; isDefault?: boolean };
   portMapping?: string;
   hubPorts?: {
@@ -103,6 +108,7 @@ export interface ConnectedDevice {
   }[];
 }
 export interface Scan {
+  collection?: { usb: boolean; displays: boolean; ports: boolean };
   machine: {
     name: string;
     model: string;
@@ -121,6 +127,12 @@ export interface PortyAPI {
   scan: () => Promise<Scan>;
   openExternal: (url: string) => Promise<void>;
   platform: string;
+  ready: () => Promise<void>;
+  reportIssue: (issue: 'renderer-error') => Promise<void>;
+  history: () => Promise<import('./events').EventHistory>;
+  clearHistory: () => Promise<void>;
+  setMonitoring: (enabled: boolean) => Promise<void>;
+  onUpdate: (callback: (update: import('./events').MonitorUpdate) => void) => () => void;
 }
 export const CONNECTORS: Connector[] = [
   "USB-C",

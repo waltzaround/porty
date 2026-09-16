@@ -1,7 +1,8 @@
 import type { ConnectedDevice, Connector, Port, Scan } from './types';
 import { monitorAssociations } from './monitor-associations';
+import { locatedDevices, physicalDeviceGroups, type PhysicalDeviceGroup } from './device-groups';
 
-export interface DevicePortGroup { id: string; name: string; detail: string; ports: Port[] }
+export interface DevicePortGroup { id: string; name: string; detail: string; ports: Port[]; physical?: PhysicalDeviceGroup }
 type Hub = { key: string; branches: ConnectedDevice[] };
 const networkDevice = (device: ConnectedDevice) => /ethernet|\bLAN\b|10[\/_]100[\/_]1000/i.test(device.name);
 
@@ -34,6 +35,19 @@ function companionHubs(devices: ConnectedDevice[]): Hub[] {
 // Captive links stay in the device inspector, but are not counted as sockets.
 export function portInventory(scan: Scan): DevicePortGroup[] {
   const groups: DevicePortGroup[] = [{ id: 'host', name: scan.machine.name, detail: 'Built-in ports', ports: scan.ports }];
+  const physical = physicalDeviceGroups(scan.ports, locatedDevices(scan.ports, scan.devices));
+  const physicalOwners = new Map<string, DevicePortGroup>();
+  function physicalOwner(model: PhysicalDeviceGroup) {
+    if (!physicalOwners.has(model.id)) {
+      const port = scan.ports.find(p => p.id === model.upstreamPortId);
+      const parent = physical.find(g => g.id === model.parentGroupId);
+      const detail = parent ? `Via ${parent.name}${port ? ` · ${port.name}` : ''}` : port ? `Connected to ${scan.machine.name} · ${port.name}` : 'Physical upstream mapping not reported';
+      const notes = model.displays.length ? model.displays.every(d => d.evidence === 'reported') ? ' · Matched by physical device identity or adapter ancestry' : ' · Display and USB share this connection · Display routing inferred' : '';
+      const target: DevicePortGroup = { id: model.id, name: model.name, detail: detail + notes, ports: [], physical: model };
+      physicalOwners.set(model.id, target); groups.push(target);
+    }
+    return physicalOwners.get(model.id)!;
+  }
   const attached = scan.ports.flatMap(p => p.devices);
   const associations = monitorAssociations([...attached, ...scan.devices]);
   const enclosures = new Map<string, DevicePortGroup>();
@@ -75,6 +89,8 @@ export function portInventory(scan: Scan): DevicePortGroup[] {
     }
     function owner(hub: Hub) {
       const root = ancestorHub(hub);
+      const model = physical.find(g => g.upstreamPortId === port?.id && root.branches.some(b => g.members.some(d => d.id === b.id)));
+      if (model) return physicalOwner(model);
       const matched = root.branches.map(enclosure);
       if (matched[0] && matched.every(group => group === matched[0])) return matched[0];
       if (monitor && root.branches.every(d => !d.parentId && !d.parentName))
@@ -110,18 +126,23 @@ export function portInventory(scan: Scan): DevicePortGroup[] {
     for (const [i, device] of devices.entries()) {
       if (device.kind === 'power' || device.kind === 'hub') continue;
       if (device.kind === 'display') {
-        const target = enclosure(device) ?? group(device.id ?? device.name, device.name, monitor === device ? `${baseDetail} · Display and USB share this connection` : port ? baseDetail : `${device.detail} · Host socket not reported`);
-        target.ports.push(row(`${target.id}:display`, 'Active display input', 'Display (unclassified)', [device], 'connected', device.id && associations.has(device.id) ? 'Display and USB hub share an OS-reported physical device identity. Each connection keeps its own upstream route; the display host socket may be unreported.' : port ? 'Current display route. USB components in this group share the host connection; the operating system does not identify every enclosure boundary.' : 'Active display reported by the operating system. Physical host socket and USB hub ownership are not reported.'));
+        if (device.displayRoute?.transport === 'internal') continue;
+        const model = physical.find(g => g.displays.some(d => d.device.id === device.id));
+        const target = model ? physicalOwner(model) : enclosure(device) ?? group(device.id ?? device.name, device.name, monitor === device ? `${baseDetail} · Display and USB share this connection` : port ? baseDetail : `${device.detail} · Host socket not reported`);
+        const connection = model?.displays.find(d => d.device.id === device.id);
+        target.ports.push(row(`${target.id}:display:${device.id ?? i}`, model?.kind === 'dock' ? device.name : 'Active display input', 'Display (unclassified)', [connection ? { ...device, portMapping: `${connection.evidence === 'inferred' ? 'Inferred: ' : ''}${connection.reason}` } : device], 'connected', connection?.reason ?? (device.id && associations.has(device.id) ? 'Display and USB hub share an OS-reported physical device identity. Each connection keeps its own upstream route; the display host socket may be unreported.' : port ? 'Current display route. USB components in this group share the host connection; the operating system does not identify every enclosure boundary.' : 'Active display reported by the operating system. Physical host socket and USB hub ownership are not reported.')));
       } else if (networkDevice(device)) {
         const parent = device.parentId ? hubByDevice.get(device.parentId) : undefined;
         const target = device.usb?.internal === true && parent ? owner(parent) : group(device.id ?? `network-${i}`, device.name, device.parentName ? `Via ${device.parentName}${port ? ` · ${port.name}` : ''}` : baseDetail);
         target.ports.push(row(`${target.id}:ethernet:${device.id ?? i}`, 'Ethernet', 'Ethernet', [device], 'unknown', 'One detected Ethernet adapter. Its USB interfaces are part of this adapter. Cable presence and network link speed are not reported by the USB inventory.'));
       } else if (!port && !device.parentId && !device.parentName && device.usb?.internal !== true) {
-        const target = group(device.id ?? `usb-${i}`, device.name);
+        const model = physical.find(g => g.members.some(d => d.id === device.id));
+        const target = model ? physicalOwner(model) : group(device.id ?? `usb-${i}`, device.name);
         target.ports.push(row(`${target.id}:connection`, 'Detected USB connection', 'USB (unclassified)', [device], 'connected', 'Device reported in system inventory. Physical upstream port and connector shape are not reported.'));
       }
     }
     groups.push(...ownerGroups.values());
   }
+  for (const model of physical) physicalOwner(model);
   return groups;
 }

@@ -220,7 +220,7 @@ export function parseWindowsScan(data: WindowsData, durationMs = 0): Scan {
     demo: false,
   };
 }
-export async function scanWindows(nativeDir: string) {
+export async function scanWindows(nativeDir: string, signal?: AbortSignal) {
   const start = Date.now();
   const shell = path.join(
     process.env.SystemRoot || "C:\\Windows",
@@ -241,6 +241,7 @@ export async function scanWindows(nativeDir: string) {
       path.join(nativeDir, "scan-windows.ps1"),
     ],
     60000,
+    signal,
   );
   return parseWindowsScan(
     JSON.parse(output.replace(/^\uFEFF/, "").trim()),

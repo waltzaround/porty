@@ -360,6 +360,7 @@ function App() {
           <DialogHeader>
             <img src="/porty.svg" width="42" height="42" alt="" />
             <DialogTitle>Get Porty</DialogTitle>
+            <p className="download-version">v{releaseVersion} · Preview</p>
             <DialogDescription>
               Choose the Porty build for your computer.
             </DialogDescription>

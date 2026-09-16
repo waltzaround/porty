@@ -1329,3 +1329,55 @@ details[open] > summary > svg:last-child {
   .connector-magsafe { background:#303c2f; color:#adc8a1; }
   .nav-item.active .nav-icon, .nav-item.active .port-glyph { background:#ffffff12; color:#f3edf9; }
 }
+
+/* Dock summaries keep each monitor's mode together across refreshes. */
+.display-reading { display: flex; flex-direction: column; gap: 1px; padding: 3px 0; }
+.display-reading small { margin: 0; }
+.device-group-summary { display: grid; grid-template-columns: minmax(260px, 1.7fr) minmax(110px, .7fr) minmax(140px, .8fr); gap: 24px; padding: 16px; }
+.device-group-summary h3 { font-size: 11px; font-weight: 500; color: var(--secondary); margin: 0 0 10px; }
+.device-group-summary h3 span { margin-left: 5px; color: var(--tertiary); }
+.device-group-summary p { margin: 0; font-size: 12px; line-height: 1.6; }
+.device-group-summary small { color: var(--secondary); font-size: 10px; }
+.dock-display { display: flex; justify-content: space-between; align-items: baseline; text-align: left; width: 100%; gap: 16px; padding: 6px 0; font-size: 12px; color: inherit; background: transparent; border: 0; border-radius: 4px; }
+button.dock-display { cursor: pointer; }
+button.dock-display:hover { color: var(--accent); }
+.dock-display > span:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dock-display-name { min-width: 0; overflow-wrap: anywhere; }
+.association-note { display: block; font-size: 9px; margin-top: 2px; }
+.device-group-summary .dock-mapping-note { color: var(--secondary); font-size: 10px; margin-top: 9px; }
+.device-connections > summary { display: flex; align-items: center; gap: 8px; color: var(--secondary); cursor: pointer; font-size: 11px; margin-bottom: 12px; list-style: none; }
+.device-connections > summary::-webkit-details-marker { display: none; }
+.device-connections:not([open]) > summary svg { transform: rotate(-90deg); }
+.device-port-sections { display: flex; flex-direction: column; gap: 24px; }
+.device-port-group:not(:has(.device-group-summary)) > .device-connections > summary { display: none; }
+@media (max-width: 1080px) {
+  .device-group-summary { gap: 16px; grid-template-columns: minmax(250px, 1.6fr) minmax(90px, .6fr) minmax(125px, .8fr); }
+  .dock-display { flex-direction: column; gap: 2px; }
+  .association-note { display: inline; margin-left: 6px; }
+}
+.topology-inspector .device-group-summary { grid-template-columns: 1fr; gap: 18px; margin: 18px 0; }
+.integrated-components { margin: 16px 0; font-size: 12px; }
+.integrated-components summary { cursor: pointer; color: var(--secondary); }
+.integrated-components > div { display: flex; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--separator); }
+.integrated-components strong { font-weight: 500; }
+.integrated-components small { color: var(--secondary); }
+
+.startup-failure { max-width: 650px; margin: 80px auto; padding: 28px; line-height: 1.6; }
+.startup-failure h1 { font-size: 22px; margin-bottom: 16px; }
+.startup-failure p { margin: 16px 0; }
+.event-log-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+.event-log-header h2 { font-size: 18px; margin-bottom: 8px; }
+.event-log-header p { color: var(--secondary); max-width: 550px; line-height: 1.6; }
+.event-log-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.event-log-actions button { display: flex; align-items: center; gap: 6px; }
+.event-list { list-style: none; padding: 0 16px; margin-top: 20px; }
+.event-entry { display: grid; grid-template-columns: 8px 85px 1fr 110px; align-items: start; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--separator); }
+.event-entry:last-child { border: 0; }
+.event-entry strong { font-size: 12px; font-weight: 500; }
+.event-entry p { color: var(--secondary); font-size: 11px; margin-top: 4px; line-height: 1.5; }
+.event-entry time { font-size: 12px; font-variant-numeric: tabular-nums; }
+.event-entry small { display: block; font-size: 10px; color: var(--secondary); margin-top: 4px; }
+.event-type { font-size: 11px; }
+.event-marker { width: 6px; height: 6px; margin-top: 5px; border-radius: 50%; background: var(--accent); }
+.event-disconnected .event-marker, .event-warning .event-marker { background: #b99262; }
+.empty-state p { max-width: 460px; margin-top: 10px; line-height: 1.6; color: var(--secondary); }
