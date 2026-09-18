@@ -1,5 +1,16 @@
 export const changelog = [
   {
+    version: "1.0.6",
+    publishedAt: "2026-09-18T09:05:00Z",
+    title: "Clearer monitor and power readings",
+    changes: [
+      "Separate HiDPI desktop size from backing pixels, including portrait displays.",
+      "Keep native display transport consistent across port and device views.",
+      "Improve monitor hub labels and distinguish USB data speed from display connections.",
+      "Show current power input, negotiated limits, and advertised maximum power separately.",
+    ],
+  },
+  {
     version: "1.0.5",
     publishedAt: "2026-09-16T11:01:11Z",
     title: "Dock grouping and connection history",
