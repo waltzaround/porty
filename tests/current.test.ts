@@ -299,12 +299,89 @@ test("active monitor identities map distinct monitors to USB-C and HDMI without 
   );
 });
 
-test("current resolution uses output pixels rather than a scaled desktop size", () => {
+test("current resolution separates the scaled desktop from backing pixels", () => {
   const mode = readCurrentDisplayMode({
     _spdisplays_pixels: "5120 x 2880",
     _spdisplays_resolution: "2560 x 1440 @ 60Hz",
   });
-  assert.equal(mode?.width, 5120);
-  assert.equal(mode?.height, 2880);
+  assert.equal(mode?.width, 2560);
+  assert.equal(mode?.height, 1440);
+  assert.equal(mode?.pixelWidth, 5120);
+  assert.equal(mode?.pixelHeight, 2880);
+  assert.equal(mode?.hiDPI, true);
   assert.equal(mode?.refreshHz, 60);
+});
+
+test("U4025QW scaled mode retains the reported desktop and backing pixels without guessing wire timing", () => {
+  const mode = readCurrentDisplayMode({
+    _spdisplays_resolution: "3840 x 1620 @ 60.00Hz",
+    _spdisplays_pixels: "7680 x 3240",
+  })!;
+  assert.equal(mode.resolution, "3840 × 1620");
+  assert.equal(mode.logicalWidth, 3840);
+  assert.equal(mode.pixelWidth, 7680);
+  assert.equal(mode.hiDPI, true);
+  assert.equal(mode.refreshHz, 60);
+  const pixelsOnly = readCurrentDisplayMode({ _spdisplays_pixels: "7680 x 3240" })!;
+  assert.equal(pixelsOnly.width, 7680);
+  assert.equal(pixelsOnly.hiDPI, undefined);
+});
+
+test("reported native display transport does not depend on knowing the physical host port", () => {
+  const data = { ...hardware, SPDisplaysDataType: [{
+    _name: "Apple M3", spdisplays_ndrvs: [
+      { _name: "DELL U4025QW", spdisplays_connection_type: "spdisplays_displayport", _spdisplays_displayID: 3, _spdisplays_resolution: "3840 x 1620 @ 60Hz" },
+      { _name: "DELL U27", spdisplays_connection_type: "spdisplays_displayport", _spdisplays_displayID: 4, _spdisplays_resolution: "2560 x 1440 @ 60Hz" },
+    ],
+  }] };
+  const scan = parseMacScan(data, [], "macOS");
+  assert.ok(scan.devices.filter(d => d.kind === "display").every(d => d.displayRoute?.transport === "native"));
+  assert.ok(scan.ports.every(p => p.devices.every(d => d.kind !== "display")));
+});
+
+test("Dell screenshot regression: two native displays on one port keep inventory routes and portrait HiDPI consistent", () => {
+  // Display names, identities and mode readings are transcribed from the
+  // supplied diff screenshots. The physical route below is synthetic: the
+  // screenshots omit the containing port and USB ancestry.
+  const displays = [
+    { id: 3, name: "DELL U4025QW", product: 17160, desktop: "3840 x 1620", pixels: "7680 x 3240" },
+    { id: 2, name: "DELL U2713H", product: 41106, desktop: "1440 x 2560", pixels: "2880 x 5120" },
+  ];
+  const data = { ...hardware, SPDisplaysDataType: [{
+    _name: "Apple M3", spdisplays_ndrvs: displays.map(d => ({
+      _name: d.name, _spdisplays_displayID: d.id,
+      "_spdisplays_display-vendor-id": "10ac",
+      "_spdisplays_display-product-id": d.product.toString(16),
+      _spdisplays_resolution: `${d.desktop} @ 60.00Hz`,
+      _spdisplays_pixels: d.pixels,
+    })),
+  }] };
+  const physical = [{
+    PortTypeDescription: "USB-C", PortNumber: 2, ConnectionActive: true,
+    TransportsActive: ["DisplayPort", "USB2"],
+    IORegistryEntryChildren: displays.map(d => {
+      const edid = Buffer.alloc(128);
+      edid.set([0, 255, 255, 255, 255, 255, 255, 0]);
+      edid.writeUInt16BE(4268, 8);
+      edid.writeUInt16LE(d.product, 10);
+      return { IOObjectClass: "IOPortTransportStateDisplayPort", Active: true, EDID: edid };
+    }),
+  }];
+  const scan = parseMacScan(data, [], "macOS", 0, physical);
+  const port = scan.ports.find(p => p.id === "mac-usbc-2")!;
+  for (const d of displays) {
+    const inventory = scan.devices.find(device => device.id === `mac-display-${d.id}`)!;
+    const mapped = port.devices.find(device => device.id === inventory.id)!;
+    assert.equal(inventory.displayRoute?.transport, "native");
+    assert.deepEqual(mapped.displayRoute, inventory.displayRoute);
+    assert.equal(mapped.portMapping, inventory.portMapping);
+    assert.equal(inventory.displayMode?.hiDPI, true);
+    assert.equal(inventory.displayMode?.refreshHz, 60);
+  }
+  const portrait = scan.devices.find(d => d.id === "mac-display-2")!.displayMode!;
+  assert.equal(portrait.width, 1440);
+  assert.equal(portrait.height, 2560);
+  assert.equal(portrait.pixelWidth, 2880);
+  assert.equal(portrait.pixelHeight, 5120);
+  assert.match(currentPortValues(port).displays.value, /1440 × 2560 \(HiDPI\)/);
 });

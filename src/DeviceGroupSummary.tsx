@@ -16,6 +16,7 @@ export function DeviceGroupSummary({
   const negotiated = power?.find(
     (p) => p.label === "Selected power input" && p.evidence === "detected",
   );
+  const maximum = power?.find(p => p.label === "Charger advertised maximum" && p.evidence === "detected");
   return (
     <div className="device-group-summary settings-group">
       <div className="dock-displays">
@@ -65,7 +66,7 @@ export function DeviceGroupSummary({
         )}
       </div>
       <div>
-        <h3>USB link</h3>
+        <h3>USB data link</h3>
         <p title="Negotiated upstream USB link; not measured transfer throughput or Thunderbolt bandwidth.">
           {group.linkSpeed?.split(" + ").map((value) => (
             <span className="current-reading" key={value}>
@@ -75,12 +76,13 @@ export function DeviceGroupSummary({
         </p>
       </div>
       <div>
-        <h3>Power to computer</h3>
+        <h3>Current power input</h3>
         <p title={measured?.detail}>
-          {measured ? `${measured.value} current` : "Not reported"}
+          {measured ? measured.value : "Not reported"}
         </p>
+        {maximum && <small className="current-reading" title={maximum.detail}>{maximum.value} advertised maximum</small>}
         {negotiated && (
-          <small title={negotiated.detail}>{negotiated.value} negotiated</small>
+          <small title={negotiated.detail}>{negotiated.value} negotiated limit</small>
         )}
       </div>
     </div>

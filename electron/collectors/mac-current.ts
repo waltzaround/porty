@@ -43,9 +43,9 @@ export function readCurrentDisplayMode(
   const text = String(
     display._spdisplays_resolution ?? display.spdisplays_resolution ?? "",
   );
-  const pixels =
-    String(display._spdisplays_pixels ?? "").match(/(\d+)\s*[x×]\s*(\d+)/i) ??
-    text.match(/(\d+)\s*[x×]\s*(\d+)/i);
+  const logical = text.match(/(\d+)\s*[x×]\s*(\d+)/i);
+  const backing = String(display._spdisplays_pixels ?? "").match(/(\d+)\s*[x×]\s*(\d+)/i);
+  const pixels = logical ?? backing;
   if (!pixels || Number(pixels[1]) <= 0 || Number(pixels[2]) <= 0) return;
   const hz =
     text.match(/(?:@|at)\s*(\d+(?:\.\d+)?)\s*Hz/i) ??
@@ -57,6 +57,11 @@ export function readCurrentDisplayMode(
     width: Number(pixels[1]),
     height: Number(pixels[2]),
     ...(hz && Number(hz[1]) > 0 ? { refreshHz: Number(hz[1]) } : {}),
+    ...(logical && backing && (logical[1] !== backing[1] || logical[2] !== backing[2]) ? {
+      logicalWidth: Number(logical[1]), logicalHeight: Number(logical[2]),
+      pixelWidth: Number(backing[1]), pixelHeight: Number(backing[2]),
+      hiDPI: Number(backing[1]) > Number(logical[1]) && Number(backing[2]) > Number(logical[2]),
+    } : {}),
   };
 }
 
@@ -96,11 +101,9 @@ export function attachCurrentDisplay(
       (route) => route.identity === monitor.displayIdentity,
     );
     if (candidates.length !== 1) continue;
-    candidates[0].port.devices.push({
-      ...monitor,
-      displayRoute: { transport: 'native' },
-      portMapping: "Monitor matched to this port’s active display identity.",
-    });
+    monitor.displayRoute = { ...monitor.displayRoute, transport: 'native' };
+    monitor.portMapping = "Monitor matched to this port’s active display identity.";
+    candidates[0].port.devices.push({ ...monitor });
     matched = true;
   }
   if (matched || routes.length) return;
@@ -121,6 +124,7 @@ export function attachCurrentDisplay(
     videoPorts.some((p) => p !== active[0] && p.connection?.active !== false)
   )
     return;
+  monitors[0].displayRoute = { ...monitors[0].displayRoute, transport: 'native' };
   active[0].devices.push({
     ...monitors[0],
     portMapping:

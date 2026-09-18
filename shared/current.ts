@@ -18,7 +18,7 @@ export function displayReadings(displays: ConnectedDevice[]) {
     return {
       id: d.id ?? `display-${index}`,
       label: displays.filter(other => other.name === d.name).length > 1 ? `${d.name} ${number}` : d.name,
-      value: mode ? `${mode.width} × ${mode.height} · ${mode.refreshHz == null ? 'Refresh not reported' : `${Number(mode.refreshHz.toFixed(3))} Hz`}` : 'Not reported',
+      value: mode ? `${mode.width} × ${mode.height}${mode.hiDPI ? " (HiDPI)" : ""} · ${mode.refreshHz == null ? 'Refresh not reported' : `${Number(mode.refreshHz.toFixed(3))} Hz`}` : 'Not reported',
     };
   });
 }
@@ -82,7 +82,7 @@ export function currentPortValues(port: Port) {
     resolution: modes.length
       ? {
           value: modes
-            .map((d) => `${d.displayMode!.width} × ${d.displayMode!.height}`)
+            .map((d) => `${d.displayMode!.width} × ${d.displayMode!.height}${d.displayMode!.hiDPI ? " (HiDPI)" : ""}`)
             .join(" / "),
           detail: displayDetail,
           reported: true,

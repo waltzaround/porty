@@ -63,7 +63,7 @@ function nodeIcon(node: TopologyNode) {
 function nodeDetail(node: TopologyNode) {
   const mode = node.device?.displayMode;
   if (mode?.width && mode?.height)
-    return `${mode.width} × ${mode.height}${mode.refreshHz ? ` · ${Number(mode.refreshHz.toFixed(2))} Hz` : ""}`;
+    return `${mode.width} × ${mode.height}${mode.hiDPI ? " (HiDPI)" : ""}${mode.refreshHz ? ` · ${Number(mode.refreshHz.toFixed(2))} Hz` : ""}`;
   return node.detail;
 }
 
@@ -607,8 +607,20 @@ export function DeviceViews({
                       </div>
                       {selected.device.displayMode && (
                         <div>
-                          <dt>Display mode</dt>
+                          <dt>{selected.device.displayMode.hiDPI ? "Desktop size (HiDPI)" : "Display mode"}</dt>
                           <dd>{nodeDetail(selected)}</dd>
+                        </div>
+                      )}
+                      {selected.device.displayMode?.pixelWidth && (
+                        <div>
+                          <dt>Backing pixels</dt>
+                          <dd>{selected.device.displayMode.pixelWidth} × {selected.device.displayMode.pixelHeight} (not verified output timing)</dd>
+                        </div>
+                      )}
+                      {selected.device.kind === "display" && (
+                        <div>
+                          <dt>Display transport</dt>
+                          <dd>{selected.device.displayRoute?.transport === "native" ? "Native display output (USB data speed is separate)" : selected.device.displayRoute?.transport === "usb" ? "USB graphics" : selected.device.displayRoute?.transport === "virtual" ? "Virtual display" : "Not reported"}</dd>
                         </div>
                       )}
                       {selected.device.portMapping && (

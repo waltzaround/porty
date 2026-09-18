@@ -300,6 +300,19 @@ export function physicalDeviceGroups(
     }
   }
   for (const group of result) {
+    // Names only label a group whose connection has already been established.
+    // They never establish enclosure membership or choose a display route.
+    if (group.displays.length && !group.displayLink && group.kind !== "monitor" &&
+        !group.members.some(d => /\bdock(?:ing)?\b/i.test(d.name))) {
+      const namedDisplays = group.displays.filter(({ device }) =>
+        group.members.some(member => member.name.trim().toLowerCase() === device.name.trim().toLowerCase()));
+      if (namedDisplays.length === 1) {
+        group.name = namedDisplays[0].device.name;
+        group.kind = "monitor";
+      } else if (/^(IOUSBHostDevice|(?:\d+-Port )?USB.*Hub|USB[23].*)$/i.test(group.name)) {
+        group.name = "Display hub";
+      }
+    }
     const port = ports.find((p) => p.id === group.upstreamPortId);
     if (
       port?.connection?.active &&

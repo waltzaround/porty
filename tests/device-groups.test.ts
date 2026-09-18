@@ -191,3 +191,26 @@ test("a USB graphics display is never assigned to a native port by the one-monit
   attachCurrentDisplay(s.ports, [s.devices[0]]);
   assert.ok(!s.ports[0].devices.some((d) => d.kind === "display"));
 });
+
+test("monitor hub with a downstream display stays one group with host charging and separate video readings", () => {
+  const s = scan();
+  s.devices = s.devices.slice(0, 2);
+  s.devices[0].name = "DELL U4025QW";
+  s.devices[1].name = "DELL U27";
+  s.devices.forEach(d => { d.displayRoute = { transport: "native" }; });
+  const graphic = s.ports[0].devices.find(d => d.usb?.vendorId === 0x17e9)!;
+  graphic.usb!.vendorId = 0x413c;
+  graphic.name = "DELL U4025QW";
+  s.ports[0].connection!.transports = ["Thunderbolt", "DisplayPort", "USB2"];
+  const model = groups(s);
+  assert.equal(model.length, 1);
+  assert.equal(model[0].name, "DELL U4025QW");
+  assert.equal(model[0].kind, "monitor");
+  assert.equal(model[0].displays.length, 2);
+  assert.equal(model[0].powerPort?.id, s.ports[0].id);
+  assert.ok(model[0].displays.every(d => d.evidence === "inferred"));
+  assert.ok(model[0].displays.every(d => d.device.displayRoute?.transport === "native"));
+  // A same-named component cannot pull monitors off another host connection.
+  s.ports[1].connection!.active = true;
+  assert.equal(groups(s)[0].displays.length, 0);
+});

@@ -113,3 +113,14 @@ References: [Adapter device path](https://learn.microsoft.com/en-us/windows/win3
 5. Capture sanitized fixtures from the DX3 and a Windows machine. Test two identical monitors, mixed native/DisplayLink outputs, two identical docks, independent cables, external hubs, missing containers, unavailable driver relations, and unplug/replug. Existing monitor-enclosure and power-attribution tests should remain valid.
 
 The initial investigation used a read-only scan and replay. The implementation above changes presentation and collection without changing hardware configuration. Private diagnostic captures remain in ignored `.tmp/`; the committed DX3 regression fixture contains only selected, sanitized fields.
+
+## Monitor hubs, scaling, and transport (September 2026 feedback)
+
+- A monitor hub may own USB ports, charging, its own panel, and downstream displays. Existing OS identity/ancestry and unique active-route rules establish the group. An exact monitor/component name match may label an already established group; it never merges devices. Multiple possible upstream connections remain unresolved.
+- USB link speed belongs to the data branch. It is not the display link speed. Native display transport is retained when reported by System Information or matched against an active port EDID, in both the port and inventory views. An Apple GPU name alone cannot identify a physical transport.
+- macOS may report a scaled desktop size alongside a larger backing pixel size. Keep both; mark the desktop HiDPI when both axes have larger backing dimensions. Neither is verified wire timing. Never unconditionally divide a resolution by two. The supplied U4025QW example becomes 3840 × 1620 at 60 Hz (HiDPI), with 7680 × 3240 backing pixels.
+- Current input watts, the selected USB-PD contract limit, and the source's advertised maximum are separate readings. Low current input does not imply a low-power charger.
+- BetterDisplay supports flexible HiDPI scaling, virtual displays, and EDID overrides. That can affect reported modes/identities; the transcript alone does not establish that it caused a fault. See [BetterDisplay](https://github.com/waydabber/BetterDisplay) and [Apple display mode properties](https://developer.apple.com/documentation/coregraphics/cgdisplaymode).
+- Dell documents the U4025QW's Thunderbolt upstream carrying video/data/power and downstream supporting display daisy chaining. See [Dell specifications](https://www.delltechnologies.com/asset/en-us/products/electronics-and-accessories/technical-support/dell-ultrasharp-40-curved-thunderbolt-hub-monitor-u4025qw-cvaa-datasheet.pdf).
+
+The transcript did not include the referenced scan attachments. The monitor-hub regression is synthetic; actual U4025QW/U27 ancestry, Billboard placement, BetterDisplay virtual records, and the 120 Hz constraint still need a scan from that machine. Do not attribute that refresh limit to a cable, macOS, or BetterDisplay without evidence.

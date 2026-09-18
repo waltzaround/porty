@@ -68,7 +68,7 @@ export function deviceTopology(
   for (const group of groups) {
     for (const node of nodes) if (node.device?.id && group.members.some(d => d.id === node.device!.id)) replacement.set(node.id, group.id);
     const port = ports.find(p => p.id === group.upstreamPortId);
-    nodes.push({ id: group.id, name: group.name, detail: group.linkSpeed ?? `${group.displays.length} displays`,
+    nodes.push({ id: group.id, name: group.name, detail: group.displays.length ? `${group.displays.length} displays${group.linkSpeed ? ` · USB ${group.linkSpeed}` : ""}` : group.linkSpeed ?? "USB hub",
       parent: group.parentGroupId ?? (port ? `port:${port.id}` : 'computer'), uncertain: !port && !group.parentGroupId, group,
       device: { id: group.id, name: group.name, detail: `${group.displays.length} displays · ${group.members.length} integrated components`, kind: 'hub', port: port?.name ?? 'System inventory', portId: port?.id, linkSpeed: group.linkSpeed },
     });

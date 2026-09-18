@@ -208,7 +208,7 @@ export function parseMacScan(
         name: String(display._name ?? "External display"),
         displayMode: readCurrentDisplayMode(display),
         displayIdentity: readDisplayIdentity(display),
-        displayRoute: { transport: /virtual|airplay/i.test(`${gpu._name} ${display.spdisplays_connection_type}`) ? 'virtual' : /DisplayLink/i.test(String(gpu._name)) ? 'usb' : 'unknown' },
+        displayRoute: { transport: /virtual|airplay/i.test(`${gpu._name} ${display.spdisplays_connection_type}`) ? 'virtual' : /DisplayLink/i.test(String(gpu._name)) ? 'usb' : /displayport|hdmi|dvi/i.test(String(display.spdisplays_connection_type)) ? 'native' : 'unknown' },
         detail: String(
           display._spdisplays_resolution ??
             display.spdisplays_resolution ??

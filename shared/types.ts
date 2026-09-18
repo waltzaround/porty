@@ -16,6 +16,12 @@ export interface DisplayResolution {
   width: number;
   height: number;
   refreshHz?: number;
+  // macOS scaled desktop coordinates and backing pixels are not wire timing.
+  logicalWidth?: number;
+  logicalHeight?: number;
+  pixelWidth?: number;
+  pixelHeight?: number;
+  hiDPI?: boolean;
 }
 export interface DisplayMode extends DisplayResolution {
   refreshHz: number;
