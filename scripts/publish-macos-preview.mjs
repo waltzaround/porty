@@ -21,6 +21,9 @@ export function planUploads(release, assets) {
 }
 
 export function macReleaseNotes(body, version) {
+  // Signed direct-download assets are published separately under immutable
+  // names. Re-running the unsigned preview job must preserve those notices.
+  if (body.includes(`<!-- macos-signed:${version} -->`)) return body;
   const section = `<!-- macos-preview:start -->
 ## macOS preview
 

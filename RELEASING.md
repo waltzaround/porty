@@ -34,7 +34,30 @@ Starting with 1.0.4, the build renews the ad-hoc macOS signature after applying 
 
 Uploads are never clobbered. Identical assets can be reused, but conflicting hashes stop publication. If uploading fails partway through, rerun the failed publish job so it uses the original build artifacts, rather than rebuilding that version. The website uses the architecture-specific DMG URLs; ZIP files remain available on the GitHub release page. Publishing a GitHub release does not automatically deploy the website: update its release settings, verify the downloads, and run `npm run deploy` from `landing/`.
 
-### Signed builds
+### Signed direct Mac downloads
+
+The Mac App Store package cannot be reused for website or GitHub downloads.
+Direct downloads require a **Developer ID Application** certificate and Apple
+notarization. The `porty-notary` Keychain profile supplies notarization credentials;
+never put its password or private signing keys in repository files or release assets.
+
+For the 1.0.6 signing update, the original arm64 and x64 release ZIPs are checked
+against their published SHA-256 digests, then signed with hardened runtime and
+the Electron JIT entitlement. The native event helper is signed without JIT
+exceptions. No application code or security fuse is changed. The apps are
+notarized and stapled before creating ZIPs; signed DMGs are notarized and stapled
+as complete containers. Verify all nested signatures, stapled tickets, and
+Gatekeeper assessments before publishing either architecture.
+
+Publish new `Porty-VERSION-mac-ARCH-signed.dmg` and `-signed.zip` assets plus
+`SHA256SUMS-macos-signed.txt`. Preserve the original unsigned assets and their
+checksums. Update the Mac release section with the `<!-- macos-signed:VERSION -->`
+marker so rerunning the preview publisher preserves the signed-download notes.
+Only after the new assets are published and verified should the website links
+change to the signed DMGs and `VITE_MAC_UNSIGNED` become `false`. Windows
+downloads keep their existing signing status.
+
+### Signed Windows builds
 
 Configure a Windows code-signing certificate in the `production` GitHub environment:
 

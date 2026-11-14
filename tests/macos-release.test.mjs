@@ -27,3 +27,8 @@ test('release notes preserve Windows instructions and add one accurate Mac secti
   assert.ok(!notes.includes('macOS downloads are not part'));
   assert.equal(macReleaseNotes(notes, '1.0.3'), notes);
 });
+
+test('preview reruns preserve published signed-download instructions', () => {
+  const notes = '# Porty\n\nWindows preview.\n\n<!-- macos-signed:1.0.6 -->\nDeveloper ID signed and notarized Mac downloads.';
+  assert.equal(macReleaseNotes(notes, '1.0.6'), notes);
+});

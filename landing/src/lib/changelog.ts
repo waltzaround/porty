@@ -8,6 +8,7 @@ export const changelog = [
       "Keep native display transport consistent across port and device views.",
       "Improve monitor hub labels and distinguish USB data speed from display connections.",
       "Show current power input, negotiated limits, and advertised maximum power separately.",
+      "Mac download update, November 14, 2026: Developer ID signed and Apple-notarized builds for Apple Silicon and Intel, with separate signed filenames and checksums.",
     ],
   },
   {

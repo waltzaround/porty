@@ -1,11 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { loadEnv } from "vite";
 
-const version = loadEnv("production", process.cwd(), "").VITE_RELEASE_VERSION;
+const settings = loadEnv("production", process.cwd(), "");
+const version = settings.VITE_RELEASE_VERSION;
+const signedMac = settings.VITE_MAC_UNSIGNED === 'false';
 const builds = [
-  { label: "Apple Silicon", file: `Porty-${version}-mac-arm64.dmg` },
-  { label: "Intel", file: `Porty-${version}-mac-x64.dmg` },
-  { label: "64-bit PC", file: `Porty-${version}-windows-x64-setup.exe` },
+  { label: "Apple Silicon", file: `Porty-${version}-mac-arm64${signedMac ? '-signed' : ''}.dmg`, signed: signedMac },
+  { label: "Intel", file: `Porty-${version}-mac-x64${signedMac ? '-signed' : ''}.dmg`, signed: signedMac },
+  { label: "64-bit PC", file: `Porty-${version}-windows-x64-setup.exe`, signed: false },
 ];
 
 for (const javaScriptEnabled of [true, false]) {
@@ -34,7 +36,7 @@ for (const javaScriptEnabled of [true, false]) {
       await expect(chooser).toContainText("Requires macOS 12 or later");
       for (const build of builds) {
         const row = chooser.locator(".release-option").filter({ hasText: build.label });
-        await expect(row).toContainText("Unsigned preview");
+        await expect(row).toContainText(build.signed ? "Signed & notarized" : "Unsigned preview");
         const link = row.getByRole("link", { name: "Download" });
         const url = `https://github.com/waltzaround/porty/releases/download/v${version}/${build.file}`;
         await expect(link).toHaveAttribute("href", url);

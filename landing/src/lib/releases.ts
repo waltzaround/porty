@@ -16,13 +16,13 @@ export const releases = [
   {
     id: "mac-arm",
     name: "macOS",
-    detail: macPreview ? "Apple Silicon · Unsigned preview" : "Apple Silicon",
+    detail: macPreview ? "Apple Silicon · Unsigned preview" : "Apple Silicon · Signed & notarized",
     url: releaseUrl(import.meta.env.VITE_DOWNLOAD_MAC_ARM64),
   },
   {
     id: "mac-intel",
     name: "macOS",
-    detail: macPreview ? "Intel · Unsigned preview" : "Intel",
+    detail: macPreview ? "Intel · Unsigned preview" : "Intel · Signed & notarized",
     url: releaseUrl(import.meta.env.VITE_DOWNLOAD_MAC_X64),
   },
   {

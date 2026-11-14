@@ -4,7 +4,7 @@
 
 The site is hosted with Cloudflare Workers static assets at **https://porty.walt.online**, using `wrangler.jsonc`. After `npm ci`, run `npx wrangler login` if needed, then `npm run deploy`. This builds the indexable static site and uploads only `dist/` using Wrangler. The domain is configured as a Worker custom domain.
 
-Public build settings and version-specific GitHub download URLs live in `.env.production`; it contains no secrets. Publish and verify the corresponding GitHub release assets before deploying new download URLs. Windows and macOS previews are labelled unsigned. Mac downloads offer separate Apple Silicon and Intel builds and require macOS 12 or later.
+Public build settings and version-specific GitHub download URLs live in `.env.production`; it contains no secrets. Publish and verify the corresponding GitHub release assets before deploying new download URLs. Windows previews are labelled unsigned. Mac downloads offer separate Developer ID signed and Apple-notarized Apple Silicon and Intel builds and require macOS 12 or later.
 
 A standalone Vite + React + TypeScript site with Tailwind CSS 4 and shadcn/ui (Radix) components. It has its own dependency lockfile and does not ship inside the desktop app.
 
@@ -69,7 +69,7 @@ The GitHub landing workflow reads the committed public `.env.production` setting
 
 ## Download links
 
-Production links point to the versioned Windows setup executable and the Apple Silicon (`mac-arm64.dmg`) and Intel (`mac-x64.dmg`) installers on the same GitHub release. The macOS preview workflow adds both Mac architectures to a published Windows preview; see [RELEASING.md](../RELEASING.md). After the release finishes, update `VITE_RELEASE_VERSION` and all three `VITE_DOWNLOAD_*` URLs in `.env.production`, build and test, then deploy. Keep `VITE_WINDOWS_UNSIGNED` and `VITE_MAC_UNSIGNED` true for previews without publisher signing; update those flags and the preview copy when signed releases become available.
+Production links point to the versioned Windows setup executable and the signed Apple Silicon (`mac-arm64-signed.dmg`) and Intel (`mac-x64-signed.dmg`) installers on the same GitHub release. The unsigned originals remain archived under their original names. The macOS preview workflow still produces unsigned builds; see [RELEASING.md](../RELEASING.md) for the separate Developer ID signing and notarization step. After release assets are published and verified, update the corresponding `VITE_DOWNLOAD_*` URLs in `.env.production`, build and test, then deploy. Keep `VITE_WINDOWS_UNSIGNED=true` for the unsigned Windows preview. Set `VITE_MAC_UNSIGNED=false` only after both Mac download targets have verified Developer ID signatures and accepted, stapled notarization tickets.
 
 For local overrides, copy `.env.example` to `.env.local`. Vite values are public, so never put credentials here. Missing or non-HTTPS URLs show “Coming soon” rather than a broken download.
 

@@ -97,12 +97,11 @@ function ReleaseOptions({ location }: { location: "page" | "dialog" }) {
           </div>
         ))}
       </div>
-      {macPreview && (
-        <p className="release-compatibility">
-          Requires macOS 12 or later. Mac previews are not Developer ID signed or
-          notarized; macOS may require approval in Privacy &amp; Security.
-        </p>
-      )}
+      <p className="release-compatibility">
+        Requires macOS 12 or later. {macPreview
+          ? 'Mac previews are not Developer ID signed or notarized; macOS may require approval in Privacy & Security.'
+          : 'Mac downloads are Developer ID signed and notarized by Apple.'}
+      </p>
     </>
   );
 }
